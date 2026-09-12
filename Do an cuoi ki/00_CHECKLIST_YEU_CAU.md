@@ -48,18 +48,18 @@
 
 | Mục | Nội dung | Trạng thái |
 |---|---|---|
-| 1 | Ghi rõ đề tài 2, căn cứ file Excel phân công | ❗ cần số nhóm + xác nhận |
+| 1 | Ghi rõ đề tài 2, căn cứ file Excel phân công | ✅ Báo cáo §I.1.1 — ❗ còn thiếu số nhóm ở trang bìa |
 
 ### 2.1. Đặt vấn đề
 
 | Mục | Nội dung | Nguồn | Trạng thái |
 |---|---|---|---|
-| 2.1a | Nhu cầu và tầm quan trọng của dự án | viết mới | ⬜ |
-| 2.1b | Sơ lược dự án, nhiệm vụ chính | viết mới | ⬜ |
-| 2.1c | **Làm nổi bật vì sao BẮT BUỘC dùng CSDLPT** | dựa vào bảng tần suất §3.2 thiết kế | ⬜ |
-| 2.1d | Vị trí và nhiệm vụ từng site | `00_ThietKe_HeThong.md` §1 | ⬜ |
-| 2.1e | Dữ liệu khi triển khai | `00_ThietKe_HeThong.md` §2, §6 | ⬜ |
-| 2.1f | Các đối tượng tham gia sử dụng | `00_ThietKe_HeThong.md` §3.3 | ⬜ |
+| 2.1a | Nhu cầu và tầm quan trọng của dự án | Báo cáo §I.1.2 | ✅ |
+| 2.1b | Sơ lược dự án, nhiệm vụ chính | Báo cáo §I.1.3 | ✅ |
+| 2.1c | **Làm nổi bật vì sao BẮT BUỘC dùng CSDLPT** | Báo cáo §I.1.4 — lập luận từ số 89% | ✅ |
+| 2.1d | Vị trí và nhiệm vụ từng site | Báo cáo §I.1.3 + §II.1.4 | ✅ |
+| 2.1e | Dữ liệu khi triển khai | Báo cáo §I.1.5 | ✅ |
+| 2.1f | Các đối tượng tham gia sử dụng | Báo cáo §I.1.6 | ✅ |
 
 ### 2.2.1. Phân tích
 
@@ -136,7 +136,8 @@ Concurrency             ██████████████████�
 Distributed query       ████████████████████  100%   09   9 PHẦN, exit code 0
 Trigger + phân quyền    ████████████████████  100%   10   6 trigger + 4 vai trò, 3 site OK
 Chụp ảnh minh chứng     ████████████████░░░░   80%   34 ảnh — thiếu 3.1, 3.2, 3.4, diagram
-Viết báo cáo            ░░░░░░░░░░░░░░░░░░░░    0%   làm sau cùng
+Viết báo cáo            ██████████████████░░   90%   BaoCao_DoAn_CSDLPhanTan.docx — 60 trang, 43 hình, 29 bảng
+                                              còn: điền tên nhóm + 5 thành viên, ảnh mục 3.1/3.2
 ```
 
 ### Mốc đã đạt (cập nhật 12/09/2026)

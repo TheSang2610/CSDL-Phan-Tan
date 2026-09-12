@@ -1,0 +1,443 @@
+// CHƯƠNG I và CHƯƠNG II của cuốn báo cáo
+const H = require('./helper');
+const { p, h1, h2, h3, li, no, code, fig, tabCap, table, pageBreak, blank } = H;
+const A = 'D:\\CSDL PHAN TAN\\Do an cuoi ki\\AnhChup\\';
+
+function chuongI() {
+  return [
+    h1('CHƯƠNG I. TỔNG QUAN'),
+
+    h2('1. Giới thiệu đề tài'),
+
+    h3('1.1. Đề tài được giao'),
+    p('Căn cứ bảng phân công đề tài đồ án cuối kỳ môn Cơ sở dữ liệu phân tán do giảng viên công bố, nhóm được giao **Đề tài 2 — Quản lý kho vật tư đa chi nhánh**.'),
+    p('Yêu cầu của đề tài là xây dựng một hệ cơ sở dữ liệu phân tán phục vụ doanh nghiệp có nhiều kho vật tư đặt tại các địa phương khác nhau, trong đó phải thể hiện được đầy đủ các kỹ thuật cốt lõi của môn học: phân mảnh dữ liệu, nhân bản dữ liệu, giao tác phân tán, điều khiển tương tranh và truy vấn phân tán.'),
+    p('Kịch bản bắt buộc mà đề tài nêu rõ: **Kho A chuyển 50 sản phẩm sang Kho B; nếu giao dịch thất bại giữa chừng thì dữ liệu phải được xử lý nhất quán.** Toàn bộ thiết kế của nhóm xoay quanh việc bảo đảm yêu cầu này.'),
+
+    h3('1.2. Nhu cầu và tầm quan trọng của dự án'),
+    p('Một doanh nghiệp thương mại vật tư xây dựng thường có kho trung tâm và nhiều kho vệ tinh đặt tại các tỉnh thành. Mỗi kho hằng ngày phát sinh hàng trăm lượt nhập, xuất, tra cứu tồn. Nếu toàn bộ dữ liệu được đặt tập trung tại một máy chủ duy nhất ở trụ sở chính, hệ thống sẽ vấp phải ba vấn đề nghiêm trọng.'),
+    li('**Phụ thuộc đường truyền.** Nhân viên kho ở tỉnh muốn lập một phiếu xuất cũng phải gửi yêu cầu qua Internet về trụ sở. Đường truyền chậm hoặc đứt là toàn bộ hoạt động của kho ngưng trệ, hàng hoá không xuất được cho khách.'),
+    li('**Nghẽn cổ chai tại máy chủ trung tâm.** Toàn bộ tải của mọi chi nhánh dồn về một nơi, trong khi phần lớn nghiệp vụ chỉ liên quan tới dữ liệu của chính kho đó.'),
+    li('**Rủi ro điểm hỏng duy nhất.** Máy chủ trung tâm gặp sự cố thì cả doanh nghiệp dừng hoạt động.'),
+    p('Cơ sở dữ liệu phân tán giải quyết cả ba vấn đề trên bằng cách đặt dữ liệu ở nơi nó được sử dụng nhiều nhất, đồng thời vẫn cho phép nhìn toàn bộ hệ thống như một cơ sở dữ liệu thống nhất.'),
+
+    h3('1.3. Sơ lược về dự án và các nhiệm vụ chính'),
+    p('Hệ thống được xây dựng gồm **ba site độc lập**, mỗi site là một thể hiện (instance) SQL Server riêng biệt, quản lý dữ liệu của một kho.'),
+    tabCap('Ba site trong hệ thống', 'I'),
+    table(
+      ['Site', 'Thể hiện SQL Server', 'CSDL', 'Kho', 'Vai trò phân tán'],
+      [
+        ['S1', 'MIGNON\\KHO_A', 'KhoA', 'Kho Trung tâm (Hà Nội)', 'Publisher + Distributor'],
+        ['S2', 'MIGNON\\KHO_B', 'KhoB', 'Kho Miền Bắc (Bắc Ninh)', 'Subscriber'],
+        ['S3', 'MIGNON\\KHO_C', 'KhoC', 'Kho Miền Nam (TP. Hồ Chí Minh)', 'Subscriber'],
+      ], [8, 22, 12, 30, 28]),
+    p('Các nhiệm vụ chính mà hệ thống phải thực hiện:'),
+    no(1, 'Nhập vật tư vào kho tại chỗ, có kiểm soát chứng từ.'),
+    no(2, 'Xuất vật tư khỏi kho tại chỗ, có kiểm tra tồn trước khi xuất.'),
+    no(3, 'Tra cứu tồn kho tại chỗ phục vụ nghiệp vụ hằng ngày.'),
+    no(4, 'Kiểm tra tồn kho **toàn hệ thống** — dữ liệu gộp từ cả ba site.'),
+    no(5, '**Điều chuyển vật tư giữa hai kho** bằng giao tác phân tán, bảo đảm không bao giờ xảy ra tình trạng kho nguồn đã trừ hàng mà kho đích chưa cộng.'),
+    no(6, '**Đồng bộ danh mục vật tư** từ Kho Trung tâm xuống hai kho còn lại.'),
+    no(7, 'Cảnh báo vật tư xuống dưới mức tồn tối thiểu.'),
+
+    h3('1.4. Vì sao bắt buộc phải dùng cơ sở dữ liệu phân tán'),
+    p('Đây là câu hỏi cốt lõi, và nhóm trả lời bằng **số liệu tần suất truy cập** chứ không bằng cảm tính. Bảng khảo sát tần suất (trình bày chi tiết ở Chương II) cho thấy:'),
+    li('Ba chức năng **nhập kho, xuất kho, tra cứu tồn tại chỗ** chiếm **565 trên tổng số 634 lượt truy cập mỗi ngày, tương đương 89%**, và toàn bộ đều **chỉ đụng tới dữ liệu của chính kho đó**.'),
+    li('Chức năng **sửa danh mục vật tư** chỉ phát sinh **6 lần mỗi ngày và chỉ tại Kho Trung tâm**, nhưng **mọi site đều phải đọc danh mục liên tục**.'),
+    li('Chỉ hai chức năng **tra cứu toàn hệ thống (19 lượt)** và **điều chuyển vật tư (18 lượt)** là bắt buộc vượt ra ngoài phạm vi một site.'),
+    p('Ba con số trên dẫn thẳng tới ba quyết định thiết kế:'),
+    no(1, '89% nghiệp vụ cục bộ theo kho ⟹ **phân mảnh ngang** bảng tồn kho và chứng từ theo mã kho, để phần lớn công việc chạy tại chỗ, không đi qua mạng.'),
+    no(2, 'Danh mục có tỷ lệ đọc trên ghi rất cao ⟹ **nhân bản** thay vì phân mảnh, để mọi site đọc được tại chỗ mà vẫn thống nhất một nguồn.'),
+    no(3, 'Hai nghiệp vụ vượt site ⟹ cần **truy vấn phân tán** và **giao tác phân tán hai pha**.'),
+    p('Nếu dùng cơ sở dữ liệu tập trung, 89% lượt truy cập lẽ ra chạy tại chỗ sẽ bị đẩy hết qua đường truyền — đó chính là lý do kỹ thuật buộc phải chọn mô hình phân tán.'),
+
+    h3('1.5. Dữ liệu khi triển khai'),
+    p('Cơ sở dữ liệu gồm **9 bảng**, chia làm ba nhóm theo cách phân bố dữ liệu:'),
+    tabCap('Ba nhóm bảng theo cách phân bố', 'I'),
+    table(
+      ['Nhóm', 'Các bảng', 'Cách phân bố'],
+      [
+        ['Danh mục', 'NhaCungCap, VatTu, Kho', 'Nhân bản — ba site giữ ba bản giống hệt nhau'],
+        ['Tồn kho', 'TonKho', 'Phân mảnh ngang nguyên thủy theo MaKho'],
+        ['Chứng từ', 'PhieuNhap, ChiTietNhap, PhieuXuat, ChiTietXuat', 'Phân mảnh ngang nguyên thủy và dẫn xuất'],
+        ['Điều chuyển', 'PhieuDieuChuyen', 'Nhân bản một phần — ghi ở cả hai kho liên quan'],
+      ], [14, 42, 44]),
+    p('Dữ liệu mẫu khi triển khai: 4 nhà cung cấp, 10 mặt hàng vật tư xây dựng, và tồn kho phân bổ thành **24 dòng** — Kho Trung tâm giữ 10 mặt hàng, hai kho vệ tinh mỗi kho 7 mặt hàng.'),
+
+    h3('1.6. Các đối tượng tham gia sử dụng'),
+    tabCap('Bốn nhóm người dùng và phạm vi quyền', 'I'),
+    table(
+      ['Nhóm người dùng', 'Làm việc tại', 'Quyền được cấp'],
+      [
+        ['Nhân viên kho', 'Kho sở tại', 'Đọc mọi bảng của kho mình; nhập và xuất kho thông qua thủ tục, không được ghi thẳng vào bảng'],
+        ['Trưởng kho', 'Kho sở tại', 'Toàn bộ quyền của nhân viên kho, cộng thêm quyền khởi tạo giao tác điều chuyển sang kho khác'],
+        ['Quản trị danh mục', 'Chỉ Kho Trung tâm', 'Toàn quyền trên danh mục vật tư và nhà cung cấp — nguồn của nhân bản'],
+        ['Ban giám đốc', 'Kho Trung tâm', 'Chỉ đọc, nhưng đọc được dữ liệu của cả ba site qua Linked Server'],
+      ], [20, 18, 62]),
+
+    pageBreak(),
+    h2('2. Cơ sở lý thuyết'),
+
+    h3('2.1. Phân mảnh ngang nguyên thủy'),
+    p('Phân mảnh ngang là phép chia một quan hệ toàn cục thành nhiều tập con các bộ (dòng), mỗi tập con đặt tại một site. Phân mảnh ngang **nguyên thủy** dùng phép chọn với một vị từ đặt trên chính quan hệ đó:'),
+    ...code(['   R_i  =  σ (p_i) (R)']),
+    p('Một phép phân mảnh hợp lệ phải thoả **ba tính chất**:'),
+    li('**Tính đầy đủ (completeness).** Mọi bộ của quan hệ toàn cục phải thuộc về ít nhất một mảnh, không được để sót dữ liệu.'),
+    li('**Tính tái thiết (reconstruction).** Phải khôi phục lại được quan hệ gốc từ các mảnh. Với phân mảnh ngang, phép tái thiết là phép hợp: R = R₁ ∪ R₂ ∪ … ∪ Rₙ.'),
+    li('**Tính tách rời (disjointness).** Các mảnh không được giao nhau, một bộ chỉ nằm ở đúng một mảnh.'),
+    p('Tập vị từ dùng để phân mảnh được rút gọn bằng thuật toán **COM_MIN**, nhằm thu được tập vị từ đầy đủ và cực tiểu, tránh sinh ra những mảnh thừa không ai dùng tới.'),
+
+    h3('2.2. Phân mảnh ngang dẫn xuất'),
+    p('Khi một quan hệ **không chứa thuộc tính dùng làm tiêu chí phân mảnh**, ta không thể phân mảnh nguyên thủy cho nó. Lúc này phải dùng phân mảnh ngang **dẫn xuất**: mảnh của quan hệ con được xác định theo mảnh của quan hệ cha thông qua **phép nửa nối (semijoin)**:'),
+    ...code(['   S_i  =  S  ⋉  R_i']),
+    p('Điều kiện để áp dụng: đồ thị nối giữa các quan hệ phải có **dạng cây đơn giản**, mỗi quan hệ thành viên có đúng một quan hệ chủ. Tính tách rời được bảo đảm khi quan hệ chủ và quan hệ thành viên có liên kết **một–nhiều**.'),
+
+    h3('2.3. Nhân bản dữ liệu'),
+    p('Nhân bản là việc giữ nhiều bản sao của cùng một dữ liệu tại nhiều site. Nhân bản làm tăng tốc độ đọc và tăng khả năng chịu lỗi, nhưng phải trả giá bằng chi phí giữ các bản sao nhất quán với nhau. Vì vậy nhân bản chỉ phù hợp với dữ liệu có **tỷ lệ đọc trên ghi cao**.'),
+    p('SQL Server cung cấp cơ chế **Transactional Replication** với ba vai trò:'),
+    li('**Publisher** — site giữ bản gốc, nơi duy nhất được phép sửa dữ liệu.'),
+    li('**Distributor** — site trung gian lưu các thay đổi đọc được từ nhật ký giao dịch và phân phát đi.'),
+    li('**Subscriber** — site nhận bản sao, chỉ đọc.'),
+    p('Hai tiến trình nền đảm nhiệm việc truyền dữ liệu: **Log Reader Agent** đọc nhật ký giao dịch của Publisher, **Distribution Agent** đẩy thay đổi xuống Subscriber.'),
+
+    h3('2.4. Giao tác phân tán và giao thức chuẩn bị hai pha'),
+    p('Một giao tác phân tán là giao tác tác động tới dữ liệu nằm trên nhiều site. Nó vẫn phải bảo đảm đầy đủ bốn tính chất **ACID**, trong đó khó nhất là **tính nguyên tố (Atomicity)**: hoặc mọi site cùng thành công, hoặc mọi site cùng quay lui.'),
+    p('Giao thức **chuẩn bị hai pha (Two-Phase Commit, 2PC)** giải quyết bài toán này:'),
+    li('**Pha 1 — Chuẩn bị.** Bộ điều phối hỏi tất cả các site tham gia: "đã sẵn sàng kết thúc chưa?". Mỗi site thực hiện phần việc của mình, ghi nhật ký, rồi trả lời **YES** hoặc **NO**.'),
+    li('**Pha 2 — Kết thúc.** Nếu **mọi** site trả lời YES, bộ điều phối ra lệnh commit đồng loạt. Chỉ cần **một** site trả lời NO hoặc mất kết nối, bộ điều phối ra lệnh **rollback toàn bộ ở mọi site**.'),
+    p('Trên nền Windows, vai trò bộ điều phối do dịch vụ **MS DTC (Microsoft Distributed Transaction Coordinator)** đảm nhiệm.'),
+
+    h3('2.5. Điều khiển tương tranh'),
+    p('Khi nhiều giao tác cùng truy cập một dữ liệu, có thể xảy ra các dị thường, trong đó phổ biến nhất là **mất cập nhật (lost update)**: hai giao tác cùng đọc một giá trị, cùng tính toán trên giá trị cũ, rồi lần ghi sau xoá mất kết quả của lần ghi trước.'),
+    p('Có hai hướng xử lý:'),
+    li('**Khoá bi quan (pessimistic).** Đặt khoá ngay lúc đọc, buộc giao tác đến sau phải chờ. Trong SQL Server dùng gợi ý `WITH (UPDLOCK, HOLDLOCK)`. Kết quả luôn đúng nhưng người đến sau phải đợi.'),
+    li('**Khoá lạc quan (optimistic).** Không khoá, nhưng lúc ghi thì kiểm tra xem dòng dữ liệu có bị ai sửa trong lúc mình xử lý hay không, thường bằng cột phiên bản `ROWVERSION`. Nếu phát hiện xung đột thì từ chối ghi và báo người dùng làm lại.'),
+    p('Việc đặt khoá có thể dẫn tới **khoá chết (deadlock)** khi hai giao tác khoá hai tài nguyên theo thứ tự ngược nhau. SQL Server có bộ giám sát khoá tự phát hiện vòng tròn chờ, chọn một giao tác làm **nạn nhân** và huỷ nó bằng lỗi **Msg 1205**, nhờ đó hệ thống tự gỡ mà không cần con người can thiệp.'),
+
+    h3('2.6. Các mức trong suốt'),
+    p('Mục tiêu cuối cùng của một hệ cơ sở dữ liệu phân tán là làm cho người dùng **không cảm thấy sự phân tán**. Các mức trong suốt được cài đặt trong đồ án này gồm:'),
+    li('**Trong suốt phân mảnh.** Người dùng viết truy vấn trên quan hệ toàn cục, không cần biết dữ liệu bị cắt thành mấy mảnh.'),
+    li('**Trong suốt vị trí.** Người dùng không cần biết mảnh dữ liệu nằm ở máy nào.'),
+    li('**Trong suốt nhân bản.** Người dùng không cần biết dữ liệu có bao nhiêu bản sao và bản sao nào đang được đọc.'),
+    li('**Trong suốt giao tác.** Người dùng gọi một lệnh, hệ thống tự lo việc bảo đảm nguyên tố trên nhiều site.'),
+  ];
+}
+
+function chuongII() {
+  return [
+    h1('CHƯƠNG II. PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG'),
+
+    h2('1. Phân tích'),
+
+    h3('1.1. Các chức năng chính truy cập vào dữ liệu'),
+    tabCap('Bảy chức năng chính của hệ thống', 'II'),
+    table(
+      ['Mã', 'Chức năng', 'Site thực hiện', 'Bảng truy cập', 'Kiểu truy cập'],
+      [
+        ['F1', 'Nhập vật tư vào kho', 'Kho sở tại', 'PhieuNhap, ChiTietNhap, TonKho', 'Ghi, cục bộ'],
+        ['F2', 'Xuất vật tư khỏi kho', 'Kho sở tại', 'PhieuXuat, ChiTietXuat, TonKho', 'Ghi, cục bộ'],
+        ['F3', 'Tra cứu tồn kho tại chỗ', 'Kho sở tại', 'TonKho, VatTu', 'Đọc, cục bộ'],
+        ['F4', 'Kiểm tra tồn kho toàn hệ thống', 'Kho Trung tâm', 'TonKho ở cả ba site', 'Đọc, **phân tán**'],
+        ['F5', 'Điều chuyển vật tư giữa hai kho', 'Kho nguồn', 'TonKho ở hai site, PhieuDieuChuyen', 'Ghi, **giao tác phân tán**'],
+        ['F6', 'Thêm, sửa danh mục vật tư', 'Chỉ Kho Trung tâm', 'VatTu, NhaCungCap', 'Ghi, **nhân bản xuống hai site**'],
+        ['F7', 'Cảnh báo dưới mức tồn tối thiểu', 'Mọi site', 'TonKho, VatTu', 'Đọc, cục bộ'],
+      ], [6, 26, 17, 30, 21]),
+
+    h3('1.2. Bảng tần suất truy cập tại các vị trí'),
+    p('Đây là căn cứ định lượng cho toàn bộ các quyết định thiết kế phía sau. Số liệu là ước lượng số lượt thao tác mỗi ngày trong điều kiện vận hành bình thường.'),
+    tabCap('Tần suất truy cập theo chức năng và vị trí (lượt/ngày)', 'II'),
+    table(
+      ['Chức năng', 'Kho A', 'Kho B', 'Kho C', 'Tổng'],
+      [
+        ['F1 — Nhập kho', '40', '25', '30', '95'],
+        ['F2 — Xuất kho', '60', '45', '55', '160'],
+        ['F3 — Tra cứu tồn tại chỗ', '120', '90', '100', '310'],
+        ['F4 — Tồn kho toàn hệ thống', '15', '2', '2', '19'],
+        ['F5 — Điều chuyển', '8', '5', '5', '18'],
+        ['F6 — Sửa danh mục', '6', '0', '0', '6'],
+        ['F7 — Cảnh báo tồn tối thiểu', '10', '8', '8', '26'],
+        ['**Tổng cộng**', '**259**', '**175**', '**200**', '**634**'],
+      ], [40, 15, 15, 15, 15]),
+    p('**Nhận xét dẫn tới thiết kế:**'),
+    no(1, 'F1, F2, F3 chiếm **565/634 ≈ 89%** tổng lượt truy cập và hoàn toàn cục bộ theo kho ⟹ phải **phân mảnh ngang** bảng TonKho và chứng từ theo MaKho.'),
+    no(2, 'F6 chỉ xảy ra ở Kho Trung tâm 6 lần/ngày nhưng mọi site đều cần đọc danh mục ⟹ **nhân bản** ba bảng danh mục.'),
+    no(3, 'F4 và F5 bắt buộc vượt site ⟹ cần **truy vấn phân tán** và **giao tác phân tán**.'),
+
+    h3('1.3. Phân quyền cho các nhóm đối tượng'),
+    p('Hệ thống thiết kế bốn vai trò, ánh xạ đúng theo bốn nhóm người dùng đã nêu ở Chương I.'),
+    tabCap('Bốn vai trò và quyền tương ứng', 'II'),
+    table(
+      ['Vai trò', 'Phạm vi', 'Quyền được cấp'],
+      [
+        ['NhanVienKho', 'Kho sở tại', 'SELECT trên mọi bảng của kho mình; EXECUTE trên các thủ tục nghiệp vụ. Bị DENY ghi thẳng vào TonKho, PhieuNhap, PhieuXuat'],
+        ['TruongKho', 'Kho sở tại', 'Kế thừa NhanVienKho, thêm EXECUTE trên sp_DieuChuyenVatTu và SELECT nhật ký kiểm toán'],
+        ['QuanTriDanhMuc', '**Chỉ Kho Trung tâm**', 'Toàn quyền trên VatTu và NhaCungCap'],
+        ['BanGiamDoc', 'Kho Trung tâm', 'Chỉ SELECT, nhưng đọc được cả ba site qua Linked Server'],
+      ], [18, 18, 64]),
+    p('**Nguyên tắc thiết kế quan trọng nhất:** nhân viên kho **không được cấp quyền ghi thẳng** vào bảng dữ liệu, mà chỉ có quyền chạy thủ tục. Nhờ cơ chế **chuỗi sở hữu (ownership chaining)** — thủ tục và bảng cùng thuộc lược đồ dbo — thủ tục vẫn ghi được vào bảng dù người gọi bị cấm. Hệ quả là **mọi thay đổi tồn kho bắt buộc đi qua đoạn mã đã kiểm tra tồn, đã đặt khoá và đã ghi chứng từ**, không tồn tại đường tắt nào.'),
+    p('Vai trò **QuanTriDanhMuc chỉ tồn tại ở Kho Trung tâm**. Đây là điểm cho thấy phân quyền được thiết kế bám sát kiến trúc phân tán: quyền sửa danh mục chỉ được cấp đúng ở nơi giữ vai trò Publisher.'),
+
+    h3('1.4. Phân tích chức năng của từng vị trí'),
+    tabCap('Nhiệm vụ riêng của từng site', 'II'),
+    table(
+      ['Site', 'Nhiệm vụ nghiệp vụ', 'Nhiệm vụ trong hệ phân tán'],
+      [
+        ['S1 — Kho Trung tâm', 'Nhập, xuất, tra cứu tồn của kho mình. Quản lý danh mục vật tư và nhà cung cấp cho toàn doanh nghiệp. Điều phối việc cấp bù hàng cho hai kho vệ tinh', 'Publisher và Distributor của nhân bản danh mục. Nơi khởi tạo phần lớn các giao tác phân tán. Nơi Ban giám đốc xem báo cáo toàn hệ thống'],
+        ['S2 — Kho Miền Bắc', 'Nhập, xuất, tra cứu tồn của kho mình. Nhận hàng điều chuyển từ Kho Trung tâm', 'Subscriber nhận danh mục. Site tham gia trong giao tác phân tán'],
+        ['S3 — Kho Miền Nam', 'Nhập, xuất, tra cứu tồn của kho mình. Nhận hàng điều chuyển từ Kho Trung tâm', 'Subscriber nhận danh mục. Site tham gia trong giao tác phân tán'],
+      ], [18, 42, 40]),
+
+    h3('1.5. Chức năng ở máy trạm và máy chủ'),
+    p('Hệ thống chia làm hai tầng. Nguyên tắc xuyên suốt là **đẩy việc xử lý xuống máy chủ, máy trạm chỉ lo giao diện** — vì trong cơ sở dữ liệu phân tán, chi phí đắt nhất là dữ liệu chạy trên đường truyền.'),
+    tabCap('Phân chia chức năng giữa máy chủ và máy trạm', 'II'),
+    table(
+      ['Tầng', 'Chức năng đảm nhiệm'],
+      [
+        ['**Máy chủ**\n(SQL Server instance)', 'Lưu trữ mảnh dữ liệu của site; cưỡng chế toàn vẹn bằng ràng buộc CHECK, khoá ngoại và trigger; xử lý nghiệp vụ trong các thủ tục; điều khiển tương tranh bằng khoá; điều phối giao tác phân tán qua MS DTC; chạy nhân bản; thực thi truy vấn phân tán; quản lý phân quyền; ghi nhật ký kiểm toán'],
+        ['**Máy trạm**\n(máy nhân viên)', 'Giao diện lập phiếu nhập, phiếu xuất, phiếu điều chuyển; kiểm tra sơ bộ dữ liệu nhập; gọi thủ tục nghiệp vụ; hiển thị kết quả và cảnh báo; in chứng từ; bắt lỗi deadlock 1205 và tự thử lại giao tác'],
+      ], [22, 78]),
+    p('Ranh giới giữa hai tầng được cưỡng chế bằng hệ thống quyền, không phải bằng quy ước lập trình. Máy trạm bị DENY quyền ghi trực tiếp, chỉ có quyền EXECUTE thủ tục.'),
+
+    h3('1.6. Phân tích cơ sở dữ liệu — mô hình thực thể liên kết'),
+    p('Cơ sở dữ liệu gồm sáu thực thể chính và ba mối kết hợp nhiều–nhiều có thuộc tính riêng.'),
+    p('**Sáu thực thể:** NhaCungCap, VatTu, Kho, PhieuNhap, PhieuXuat, PhieuDieuChuyen.'),
+    p('**Ba mối kết hợp nhiều–nhiều** — trong mô hình thực thể liên kết chúng **không phải là thực thể**, chỉ trở thành bảng khi chuyển sang mô hình quan hệ:'),
+    ...code([
+      '   KHO      ◇────< TỒN KHO >────◇  VẬT TƯ     thuộc tính: SoLuong, NgayCapNhat',
+      '   PHIẾU NHẬP ◇──< CHI TIẾT NHẬP >──◇ VẬT TƯ  thuộc tính: SoLuong, DonGia',
+      '   PHIẾU XUẤT ◇──< CHI TIẾT XUẤT >──◇ VẬT TƯ  thuộc tính: SoLuong, DonGia',
+    ]),
+    tabCap('Các mối kết hợp và bản số', 'II'),
+    table(
+      ['Mối kết hợp', 'Thực thể A', 'Bản số', 'Thực thể B', 'Ý nghĩa'],
+      [
+        ['cung cấp', 'NhaCungCap', '1 : N', 'VatTu', 'Mỗi vật tư do một nhà cung cấp chính'],
+        ['TỒN KHO', 'Kho', 'M : N', 'VatTu', 'Có thuộc tính SoLuong'],
+        ['lập tại', 'Kho', '1 : N', 'PhieuNhap', 'Mỗi phiếu thuộc đúng một kho'],
+        ['nhập từ', 'NhaCungCap', '1 : N', 'PhieuNhap', 'Mỗi phiếu mua của một nhà cung cấp'],
+        ['CHI TIẾT NHẬP', 'PhieuNhap', 'M : N', 'VatTu', 'Có SoLuong và DonGia'],
+        ['lập tại', 'Kho', '1 : N', 'PhieuXuat', 'Mỗi phiếu thuộc đúng một kho'],
+        ['CHI TIẾT XUẤT', 'PhieuXuat', 'M : N', 'VatTu', 'Có SoLuong và DonGia'],
+        ['chuyển đi', 'Kho', '1 : N', 'PhieuDieuChuyen', 'Vai trò **kho nguồn**'],
+        ['chuyển đến', 'Kho', '1 : N', 'PhieuDieuChuyen', 'Vai trò **kho đích**'],
+      ], [20, 18, 10, 20, 32]),
+    p('**Điểm đáng chú ý:** thực thể Kho tham gia vào PhieuDieuChuyen **hai lần với hai vai trò khác nhau** — kho nguồn và kho đích. Đây chính là thực thể khiến hệ thống **bắt buộc** phải dùng giao tác phân tán, vì một phiếu điều chuyển đụng tới dữ liệu nằm ở hai site khác nhau.'),
+
+    pageBreak(),
+    h2('2. Thiết kế'),
+
+    h3('2.1. Thiết kế cơ sở dữ liệu quan hệ'),
+    tabCap('Danh sách chín bảng của hệ thống', 'II'),
+    table(
+      ['#', 'Bảng', 'Khoá chính', 'Ý nghĩa'],
+      [
+        ['1', 'NhaCungCap', 'MaNCC', 'Nhà cung cấp vật tư'],
+        ['2', 'VatTu', 'MaVT', 'Danh mục vật tư'],
+        ['3', 'Kho', 'MaKho', 'Danh sách ba kho và tên máy chủ tương ứng'],
+        ['4', 'TonKho', 'MaKho + MaVT', 'Số lượng tồn của từng vật tư tại từng kho'],
+        ['5', 'PhieuNhap', 'MaPN', 'Phiếu nhập kho'],
+        ['6', 'ChiTietNhap', 'MaPN + MaVT', 'Dòng hàng của phiếu nhập'],
+        ['7', 'PhieuXuat', 'MaPX', 'Phiếu xuất kho'],
+        ['8', 'ChiTietXuat', 'MaPX + MaVT', 'Dòng hàng của phiếu xuất'],
+        ['9', 'PhieuDieuChuyen', 'MaDC', 'Phiếu điều chuyển vật tư giữa hai kho'],
+      ], [5, 22, 22, 51]),
+
+    p('**Quy ước mã** — điểm này rất quan trọng trong hệ phân tán:'),
+    tabCap('Quy ước sinh mã', 'II'),
+    table(
+      ['Bảng', 'Quy ước', 'Ví dụ'],
+      [
+        ['Kho', 'KHO_A, KHO_B, KHO_C', 'KHO_A'],
+        ['VatTu', 'VT + 3 chữ số', 'VT001'],
+        ['NhaCungCap', 'NCC + 2 chữ số', 'NCC01'],
+        ['PhieuNhap', 'PN + ký tự kho + 4 chữ số', 'PNA0001'],
+        ['PhieuXuat', 'PX + ký tự kho + 4 chữ số', 'PXB0001'],
+        ['PhieuDieuChuyen', 'DC + ký tự kho nguồn + 3 chữ số', 'DCA001'],
+      ], [24, 48, 28]),
+    p('Mã chứng từ **có nhúng ký tự kho** để bảo đảm **khoá chính không đụng nhau giữa ba site**. Đây là kỹ thuật bắt buộc khi khoá chính được sinh độc lập ở nhiều nơi — nếu ba site cùng sinh mã PN0001 thì khi gộp dữ liệu sẽ xung đột.'),
+
+    p('Mười ràng buộc khoá ngoại liên kết chín bảng với nhau:'),
+    tabCap('Danh sách khoá ngoại', 'II'),
+    table(
+      ['#', 'Tên ràng buộc', 'Bảng con', 'Cột', 'Trỏ tới'],
+      [
+        ['1', 'FK_VatTu_NCC', 'VatTu', 'MaNCC', 'NhaCungCap'],
+        ['2', 'FK_TonKho_Kho', 'TonKho', 'MaKho', 'Kho'],
+        ['3', 'FK_TonKho_VatTu', 'TonKho', 'MaVT', 'VatTu'],
+        ['4', 'FK_PN_Kho', 'PhieuNhap', 'MaKho', 'Kho'],
+        ['5', 'FK_PN_NCC', 'PhieuNhap', 'MaNCC', 'NhaCungCap'],
+        ['6', 'FK_CTN_PN', 'ChiTietNhap', 'MaPN', 'PhieuNhap'],
+        ['7', 'FK_CTN_VatTu', 'ChiTietNhap', 'MaVT', 'VatTu'],
+        ['8', 'FK_PX_Kho', 'PhieuXuat', 'MaKho', 'Kho'],
+        ['9', 'FK_CTX_PX', 'ChiTietXuat', 'MaPX', 'PhieuXuat'],
+        ['10', 'FK_CTX_VatTu', 'ChiTietXuat', 'MaVT', 'VatTu'],
+      ], [6, 26, 22, 18, 28]),
+
+    h3('2.2. Lược đồ phân mảnh ngang nguyên thủy'),
+    p('Bảng **TonKho** được phân mảnh ngang nguyên thủy theo thuộc tính MaKho. Tập vị từ đơn giản sinh từ ba chức năng cục bộ F1, F2, F3:'),
+    ...code([
+      '   p1 : MaKho = \'KHO_A\'',
+      '   p2 : MaKho = \'KHO_B\'',
+      '   p3 : MaKho = \'KHO_C\'',
+    ]),
+    p('Tập suy dẫn thoả **p1 ∨ p2 ∨ p3 ≡ TRUE** và ba vị từ đôi một loại trừ nhau. Áp dụng thuật toán COM_MIN, tập vị từ cực tiểu giữ lại là Pr\' = {p1, p2}, vì p3 ⇔ ¬p1 ∧ ¬p2.'),
+    tabCap('Ba mảnh ngang nguyên thủy của TonKho', 'II'),
+    table(
+      ['Mảnh', 'Định nghĩa', 'Đặt tại', 'Số dòng'],
+      [
+        ['TonKho_A', 'σ (MaKho = \'KHO_A\') (TonKho)', 'S1', '10'],
+        ['TonKho_B', 'σ (MaKho = \'KHO_B\') (TonKho)', 'S2', '7'],
+        ['TonKho_C', 'σ (MaKho = \'KHO_C\') (TonKho)', 'S3', '7'],
+      ], [18, 42, 18, 22]),
+    p('Hai bảng **PhieuNhap** và **PhieuXuat** cũng được phân mảnh nguyên thủy theo cùng vị từ, vì bản thân chúng có chứa thuộc tính MaKho.'),
+    p('Định nghĩa mảnh được **cưỡng chế ngay tại tầng cơ sở dữ liệu** bằng ràng buộc kiểm tra, chứ không phải chỉ là quy ước:'),
+    ...code(['   CONSTRAINT CK_TonKho_Manh  CHECK (MaKho = \'KHO_A\')']),
+    p('Nhờ ràng buộc này, dù người dùng có quyền quản trị cao nhất cũng không thể ghi nhầm dữ liệu của kho khác vào mảnh này.'),
+
+    h3('2.3. Lược đồ phân mảnh ngang dẫn xuất'),
+    p('Hai bảng **ChiTietNhap** và **ChiTietXuat không chứa thuộc tính MaKho**, nên không thể phân mảnh nguyên thủy. Bắt buộc phải phân mảnh dẫn xuất theo phiếu bằng phép nửa nối:'),
+    ...code([
+      '   PhieuNhap_i    =  σ (MaKho = \'KHO_i\') (PhieuNhap)      (nguyên thủy)',
+      '   ChiTietNhap_i  =  ChiTietNhap  ⋉  PhieuNhap_i          (DẪN XUẤT, nối theo MaPN)',
+      '',
+      '   PhieuXuat_i    =  σ (MaKho = \'KHO_i\') (PhieuXuat)',
+      '   ChiTietXuat_i  =  ChiTietXuat  ⋉  PhieuXuat_i          (DẪN XUẤT, nối theo MaPX)',
+    ]),
+    p('**Đồ thị nối:** ChiTietNhap → PhieuNhap → Kho. Đây là đồ thị **dạng cây đơn giản**, mỗi quan hệ thành viên có đúng một quan hệ chủ, đủ điều kiện áp dụng phân mảnh dẫn xuất.'),
+    p('**Tính tách rời** được bảo đảm vì liên kết PhieuNhap : ChiTietNhap là **một–nhiều** — mỗi dòng chi tiết thuộc đúng một phiếu, phiếu đó lại thuộc đúng một kho.'),
+
+    h3('2.4. Lược đồ nhân bản'),
+    p('Ba bảng danh mục **VatTu, NhaCungCap, Kho** được nhân bản thay vì phân mảnh, vì tỷ lệ đọc trên ghi rất cao (6 lượt ghi so với hàng trăm lượt đọc mỗi ngày).'),
+    tabCap('Cấu hình nhân bản', 'II'),
+    table(
+      ['Thành phần', 'Giá trị'],
+      [
+        ['Phương pháp', 'Transactional Replication một chiều'],
+        ['Publisher', 'MIGNON\\KHO_A (Kho Trung tâm)'],
+        ['Distributor', 'MIGNON\\KHO_A (gộp chung, vì hệ ba site nhỏ)'],
+        ['Subscriber', 'MIGNON\\KHO_B và MIGNON\\KHO_C'],
+        ['Kiểu đăng ký', 'Push Subscription — Publisher chủ động đẩy xuống'],
+        ['Tên Publication', 'PUB_DanhMuc'],
+        ['Số bài viết (article)', '3 — VatTu, NhaCungCap, Kho'],
+        ['Độ trễ đồng bộ đo được', 'khoảng 15–20 giây'],
+      ], [30, 70]),
+    p('Chọn **một chiều** (Publisher sửa, Subscriber chỉ đọc) thay vì nhân bản hai chiều, vì chức năng F6 cho thấy danh mục chỉ được sửa tại Kho Trung tâm. Nhân bản một chiều đơn giản hơn nhiều và **loại bỏ hoàn toàn bài toán xung đột ghi** giữa các bản sao.'),
+    p('Bảng **PhieuDieuChuyen** dùng cơ chế khác: **nhân bản một phần** — một phiếu điều chuyển được ghi đồng thời ở cả kho nguồn lẫn kho đích, ngay trong cùng một giao tác phân tán, để hai bên cùng có chứng từ đối chiếu.'),
+
+    h3('2.5. Lược đồ định vị'),
+    tabCap('Lược đồ định vị dữ liệu trên ba site', 'II'),
+    table(
+      ['Bảng / Mảnh', 'S1 KHO_A', 'S2 KHO_B', 'S3 KHO_C', 'Cơ chế'],
+      [
+        ['NhaCungCap', 'Gốc', 'Bản sao', 'Bản sao', 'Nhân bản'],
+        ['VatTu', 'Gốc', 'Bản sao', 'Bản sao', 'Nhân bản'],
+        ['Kho', 'Gốc', 'Bản sao', 'Bản sao', 'Nhân bản'],
+        ['TonKho_A', '✔', '—', '—', 'Phân mảnh ngang'],
+        ['TonKho_B', '—', '✔', '—', 'Phân mảnh ngang'],
+        ['TonKho_C', '—', '—', '✔', 'Phân mảnh ngang'],
+        ['PhieuNhap_A + ChiTietNhap_A', '✔', '—', '—', 'Nguyên thủy + dẫn xuất'],
+        ['PhieuNhap_B + ChiTietNhap_B', '—', '✔', '—', 'Nguyên thủy + dẫn xuất'],
+        ['PhieuNhap_C + ChiTietNhap_C', '—', '—', '✔', 'Nguyên thủy + dẫn xuất'],
+        ['PhieuXuat_A + ChiTietXuat_A', '✔', '—', '—', 'Nguyên thủy + dẫn xuất'],
+        ['PhieuXuat_B + ChiTietXuat_B', '—', '✔', '—', 'Nguyên thủy + dẫn xuất'],
+        ['PhieuXuat_C + ChiTietXuat_C', '—', '—', '✔', 'Nguyên thủy + dẫn xuất'],
+        ['PhieuDieuChuyen', '✔', '✔', '✔', 'Ghi hai site qua giao tác phân tán'],
+      ], [30, 12, 12, 12, 34]),
+    p('**Ghi chú quan trọng:** ba site dùng **cùng một tên bảng** `TonKho`, không đặt tên `TonKho_A`. Mảnh được xác định bởi **vị trí site** cộng với ràng buộc CHECK. Cách này giúp câu lệnh ứng dụng giống hệt nhau ở mọi site — đúng tinh thần **trong suốt phân mảnh**.'),
+    p('**Căn cứ định vị** — vì sao đặt mảnh nào ở đâu:'),
+    li('Mảnh TonKho_i đặt tại site i, vì F1+F2+F3 chiếm 89% lượt truy cập và hoàn toàn cục bộ theo kho.'),
+    li('Chứng từ đi theo kho lập ra nó, vì phiếu nhập và phiếu xuất chỉ được đọc lại bởi chính kho đó.'),
+    li('Danh mục nhân bản thay vì phân mảnh, vì tỷ lệ đọc trên ghi rất cao.'),
+    li('Publisher đặt ở KHO_A, vì F6 chỉ xảy ra tại Kho Trung tâm.'),
+
+    h3('2.6. Lược đồ ánh xạ'),
+    p('Lược đồ ánh xạ mô tả đường đi từ cái nhìn của người dùng xuống tới dữ liệu vật lý, qua bốn tầng:'),
+    ...code([
+      '  TẦNG 1 — LƯỢC ĐỒ TOÀN CỤC',
+      '     TonKho (MaKho, MaVT, SoLuong, NgayCapNhat)',
+      '     Người dùng nhìn thấy MỘT bảng duy nhất',
+      '                         │',
+      '  TẦNG 2 — LƯỢC ĐỒ PHÂN MẢNH',
+      '     TonKho_A = σ(MaKho=\'KHO_A\')(TonKho)',
+      '     TonKho_B = σ(MaKho=\'KHO_B\')(TonKho)',
+      '     TonKho_C = σ(MaKho=\'KHO_C\')(TonKho)',
+      '                         │',
+      '  TẦNG 3 — LƯỢC ĐỒ ĐỊNH VỊ',
+      '     TonKho_A  →  S1   TonKho_B  →  S2   TonKho_C  →  S3',
+      '                         │',
+      '  TẦNG 4 — LƯỢC ĐỒ ÁNH XẠ ĐỊA PHƯƠNG',
+      '     S1: KhoA.dbo.TonKho     S2: KhoB.dbo.TonKho     S3: KhoC.dbo.TonKho',
+    ]),
+    p('Trong hệ thống, **khung nhìn v_TonKho_ToanHeThong** chính là hiện thực hoá của tầng 1 và tầng 2: nó thực hiện phép hợp ba mảnh, nhờ đó người dùng viết truy vấn như đang làm việc với một bảng duy nhất.'),
+    p('**Thủ tục sp_TonKhoToanHeThong** hiện thực hoá tầng 3: nó đọc tên máy chủ từ **cột ServerName của bảng Kho** rồi mới dựng câu lệnh, nên thêm một kho mới chỉ cần thêm một dòng vào bảng Kho, **không phải sửa một dòng mã nguồn nào**.'),
+
+    h3('2.7. Thiết kế kiến trúc hệ thống'),
+    p('Hệ thống dùng kiến trúc **lai giữa Ngang hàng và Client/Server**, tuỳ theo loại dữ liệu:'),
+    li('**Ngang hàng (peer-to-peer)** với dữ liệu **tồn kho và chứng từ**. Mỗi kho toàn quyền trên mảnh dữ liệu của mình, không kho nào phụ thuộc kho khác để nhập xuất hằng ngày. Ba site nối với nhau bằng **Linked Server hai chiều**, site nào cũng đọc được dữ liệu của site kia.'),
+    li('**Client/Server** với dữ liệu **danh mục**. Kho Trung tâm là Publisher duy nhất được sửa, hai kho còn lại là Subscriber chỉ đọc. Cách này bảo đảm danh mục vật tư toàn hệ thống luôn thống nhất.'),
+    p('Sơ đồ kiến trúc tổng thể:'),
+    ...code([
+      '                    ╔════════════════════════════════╗',
+      '                    ║   S1 — MIGNON\\KHO_A            ║',
+      '                    ║   Kho Trung tâm (Hà Nội)       ║',
+      '                    ║   PUBLISHER + DISTRIBUTOR      ║',
+      '                    ╚═══════╦════════════════╦═══════╝',
+      '          Replication       ║                ║   Replication',
+      '          (danh mục)        ▼                ▼   (danh mục)',
+      '   ╔════════════════════════════╗  ╔════════════════════════════╗',
+      '   ║  S2 — MIGNON\\KHO_B         ║  ║  S3 — MIGNON\\KHO_C         ║',
+      '   ║  Kho Miền Bắc              ║  ║  Kho Miền Nam              ║',
+      '   ║  SUBSCRIBER                ║  ║  SUBSCRIBER                ║',
+      '   ╚═════════════╦══════════════╝  ╚═════════════╦══════════════╝',
+      '                 ║                               ║',
+      '                 ╚═══════ Linked Server ═════════╝',
+      '        (truy vấn phân tán + giao tác phân tán qua MS DTC)',
+    ]),
+    p('**Đường đồng bộ hoá** trong hệ thống có hai loại, phục vụ hai mục đích khác nhau:'),
+    tabCap('Hai đường đồng bộ hoá', 'II'),
+    table(
+      ['Đường', 'Cơ chế', 'Dữ liệu', 'Tính chất'],
+      [
+        ['Nhân bản danh mục', 'Transactional Replication', 'VatTu, NhaCungCap, Kho', 'Một chiều, bất đồng bộ, độ trễ 15–20 giây'],
+        ['Điều chuyển vật tư', 'Giao tác phân tán 2PC qua MS DTC', 'TonKho, PhieuDieuChuyen', 'Hai chiều, đồng bộ tức thời, nguyên tố tuyệt đối'],
+      ], [22, 26, 22, 30]),
+    p('Sự khác biệt này rất quan trọng: danh mục chấp nhận độ trễ vài giây vì giá vật tư đổi chậm; còn tồn kho thì **không được phép có độ trễ**, vì một giây sai lệch là có thể bán mất hàng không có thật.'),
+
+    h3('2.8. Mô hình hệ thống tại chi nhánh và toàn hệ thống'),
+    p('**Mô hình tại một chi nhánh:**'),
+    ...code([
+      '  ┌──────────────── MỘT CHI NHÁNH KHO ─────────────────┐',
+      '  │  FRONT END                 BACK END                 │',
+      '  │  ┌──────────────────┐      ┌─────────────────────┐  │',
+      '  │  │ Máy nhân viên    │ EXEC │ SQL Server instance │  │',
+      '  │  │  · lập phiếu     ├─────►│  · 9 bảng           │  │',
+      '  │  │  · tra tồn       │◄─────┤  · 5 thủ tục        │  │',
+      '  │  │  · in chứng từ   │ K.quả│  · 6 trigger        │  │',
+      '  │  └──────────────────┘      │  · 4 vai trò        │  │',
+      '  │  ┌──────────────────┐      │  · SQL Agent        │  │',
+      '  │  │ Máy trưởng kho   ├─────►│  · MS DTC           │  │',
+      '  │  └──────────────────┘      └──────────┬──────────┘  │',
+      '  └───────────────────────────────────────┼─────────────┘',
+      '                              ra mạng WAN / VPN ZeroTier',
+    ]),
+    p('**Mô hình toàn hệ thống:**'),
+    ...code([
+      '  TẦNG NGƯỜI DÙNG (FRONT END)',
+      '  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌──────────────┐',
+      '  │ NV kho A  │ │ NV kho B  │ │ NV kho C  │ │ Ban giám đốc │',
+      '  │ Trưởng A  │ │ Trưởng B  │ │ Trưởng C  │ │ QT danh mục  │',
+      '  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └──────┬───────┘',
+      '  ══════╪═════════════╪═════════════╪══════════════╪════════',
+      '            MẠNG RIÊNG ẢO — ZeroTier (10.147.x.x)',
+      '  ══════╪═════════════╪═════════════╪══════════════╪════════',
+      '  TẦNG CSDL (BACK END)                              │',
+      '  ┌─────▼─────┐ ┌─────▼─────┐ ┌─────▼─────┐        │',
+      '  │KHO_A :1440│ │KHO_B :1441│ │KHO_C :1442│◄───────┘',
+      '  │Publisher  │ │Subscriber │ │Subscriber │',
+      '  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘',
+      '        └─── Linked Server + MS DTC ┘',
+    ]),
+  ];
+}
+
+module.exports = { chuongI, chuongII };
