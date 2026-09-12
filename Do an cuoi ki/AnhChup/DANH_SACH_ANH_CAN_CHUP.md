@@ -5,6 +5,17 @@ Chụp nhanh bằng **`Windows + Shift + S`**, dán vào Paint rồi lưu, hoặ
 
 ---
 
+## 2.2 — Thiết kế cơ sở dữ liệu  → thư mục `2.2_ThietKe/`
+
+| Tên file phải đặt | Màn hình | Cách lấy |
+|---|---|---|
+| `01_DatabaseDiagram_9Bang.png` | Sơ đồ quan hệ chín bảng | SSMS → `KhoA` → **Database Diagrams** → chuột phải → **New Database Diagram** → thêm cả 9 bảng → phóng vừa màn hình → chụp |
+
+Ảnh này được chèn vào **Chương II mục 2.1** của cuốn báo cáo. Tên file phải đúng
+từng ký tự, vì script sinh báo cáo gọi đích danh tên đó.
+
+---
+
 ## 3.3 — Cài đặt SQL Server  → thư mục `3.3_CaiDat_SQLServer/`
 
 Chụp trong lúc cài **KHO_B** (KHO_A đã cài trước nên bỏ qua, KHO_C chụp bổ sung 2 ảnh cuối).

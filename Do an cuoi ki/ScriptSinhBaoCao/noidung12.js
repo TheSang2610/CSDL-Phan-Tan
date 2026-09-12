@@ -273,6 +273,11 @@ function chuongII() {
         ['10', 'FK_CTX_VatTu', 'ChiTietXuat', 'MaVT', 'VatTu'],
       ], [6, 26, 22, 18, 28]),
 
+    p('Sơ đồ quan hệ dưới đây do SQL Server Management Studio sinh trực tiếp từ lược đồ đã cài đặt tại site KHO_A, nên nó phản ánh đúng những gì thật sự tồn tại trong cơ sở dữ liệu chứ không phải bản vẽ thiết kế trên giấy.'),
+    ...fig(A + '2.2_ThietKe\\01_DatabaseDiagram_9Bang.png',
+           'Sơ đồ quan hệ chín bảng sinh từ SSMS tại site KHO_A', 'II'),
+    p('Hai bảng **PhieuDieuChuyen** và **NhatKyKiemToan** đứng tách khỏi cụm quan hệ ở giữa sơ đồ. Điều này là **có chủ ý**, không phải thiếu sót thiết kế: PhieuDieuChuyen tham chiếu tới kho nguồn và kho đích nằm ở **hai site khác nhau**, mà ràng buộc khoá ngoại của SQL Server không vượt qua ranh giới máy chủ được, nên tính toàn vẹn của nó phải do giao tác phân tán và trigger bảo đảm thay cho khoá ngoại. NhatKyKiemToan là bảng nhật ký thuần tuý, cố tình không ràng buộc để một dòng nhật ký vẫn ghi lại được ngay cả khi bản ghi bị thao tác sai đã không còn tồn tại.'),
+
     h3('2.2. Lược đồ phân mảnh ngang nguyên thủy'),
     p('Bảng **TonKho** được phân mảnh ngang nguyên thủy theo thuộc tính MaKho. Tập vị từ đơn giản sinh từ ba chức năng cục bộ F1, F2, F3:'),
     ...code([

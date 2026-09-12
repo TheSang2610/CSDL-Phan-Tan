@@ -1,7 +1,7 @@
 # TRIỂN KHAI HỆ THỐNG LÊN 3 MÁY VẬT LÝ
 
-> Dành cho **bạn** — người điều phối. Hai bạn kia đọc file
-> `GUI_CHO_BAN_CAI_TRUOC.md` và làm ở nhà trước.
+> Dành cho **bạn** — người điều phối. Hai bạn kia mỗi người nhận **một file riêng**
+> (`GUI_CHO_BAN_KHO_B.md` / `GUI_CHO_BAN_KHO_C.md`) và làm ở nhà trước.
 >
 > Mục tiêu: KHO_A ở máy bạn, KHO_B ở máy bạn thứ nhất, KHO_C ở máy bạn thứ hai,
 > ba máy nối nhau qua ZeroTier, chạy được **truy vấn phân tán** và **giao tác
@@ -76,9 +76,11 @@ Làm theo bước A3–A5 của `HUONG_DAN_ZEROTIER_3MAY.md`.
 Xong rồi gửi cho mỗi bạn **ba thứ**:
 
 ```
-1. File  GUI_CHO_BAN_CAI_TRUOC.md
-2. Network ID ZeroTier  (16 ký tự)
-3. Nhắc: instance của bạn tên KHO_B  (bạn kia là KHO_C), mật khẩu sa là 123
+Ban thu nhat:  GUI_CHO_BAN_KHO_B.md  + Network ID ZeroTier (16 ky tu)
+Ban thu hai :  GUI_CHO_BAN_KHO_C.md  + Network ID ZeroTier (16 ky tu)
+
+Gui dung file cua tung nguoi. Moi file da dien san ten instance va
+cong TCP rieng, nen ho chi viec chep nguyen, khong phai tu doi.
 ```
 
 ## 1.4. Sao lưu hai database để mang đi
@@ -277,7 +279,8 @@ cộng thêm cho mục 3.1 và 3.2, không phải thứ chống đỡ cả đồ
 - [ ] Chạy `BatTCPIP_VaFirewall.ps1` trên máy bạn
 - [ ] Mở MS DTC cho mạng trên máy bạn → 📷
 - [ ] Tạo network ZeroTier, lấy Network ID
-- [ ] Gửi 2 bạn: `GUI_CHO_BAN_CAI_TRUOC.md` + Network ID + file `.bak`
+- [ ] Gửi bạn thứ nhất: `GUI_CHO_BAN_KHO_B.md` + Network ID + `KhoB.bak`
+- [ ] Gửi bạn thứ hai: `GUI_CHO_BAN_KHO_C.md` + Network ID + `KhoC.bak`
 - [ ] Thu đủ tên máy chủ và IP ảo của hai bạn
 - [ ] Điền sẵn 6 dòng thông số vào `11_ChuyenSang3May.sql`
 
