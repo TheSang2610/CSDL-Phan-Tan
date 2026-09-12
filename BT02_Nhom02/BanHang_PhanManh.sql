@@ -1,0 +1,285 @@
+/* ============================================================
+   BÀI TẬP KỸ NĂNG 2 - PHÂN MẢNH NGANG NGUYÊN THỦY & DẪN XUẤT
+   CSDL QUẢN LÝ BÁN HÀNG
+   Kịch bản SQL (SQL Server). Với MySQL: bỏ tiền tố N',
+   đổi NVARCHAR -> VARCHAR, GO -> ;, SELECT * INTO T FROM ...
+   -> CREATE TABLE T AS SELECT ...
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. LƯỢC ĐỒ QUAN HỆ  (CÂU 1)
+
+   NHANVIEN ( MANV , TENNV , NGAYSINH , TUOI , GIOITINH )
+   DIACHI   ( MANV , DIACHI )          -- thuộc tính đa trị tách ra
+   MATHANG  ( MAMH , GIABAN , CHUNGLOAI , MANV , THOIDIEMBAN )
+                                        -- liên kết BAN 1:N nhúng vào phía N
+   ------------------------------------------------------------ */
+
+IF OBJECT_ID('MATHANG',  'U') IS NOT NULL DROP TABLE MATHANG;
+IF OBJECT_ID('DIACHI',   'U') IS NOT NULL DROP TABLE DIACHI;
+IF OBJECT_ID('NHANVIEN', 'U') IS NOT NULL DROP TABLE NHANVIEN;
+GO
+
+CREATE TABLE NHANVIEN (
+    MANV     CHAR(6)      NOT NULL PRIMARY KEY,  -- khóa chính
+    TENNV    NVARCHAR(50) NOT NULL,
+    NGAYSINH DATE         NOT NULL,
+    TUOI     INT          NOT NULL,              -- thuộc tính SUY DIỄN từ NGAYSINH
+    GIOITINH NVARCHAR(5)  NOT NULL
+        CHECK (GIOITINH IN (N'Nam', N'Nữ'))
+);
+GO
+/* Ghi chú: TUOI là thuộc tính suy diễn. Trong thực tế nên khai báo
+   cột tính toán:  TUOI AS DATEDIFF(YEAR, NGAYSINH, GETDATE())
+   Ở đây lưu tường minh (mốc tính 31/12/2025) để kịch bản chạy tất định. */
+
+CREATE TABLE DIACHI (
+    MANV   CHAR(6)       NOT NULL,
+    DIACHI NVARCHAR(100) NOT NULL,
+    PRIMARY KEY (MANV, DIACHI),                  -- 1 NV có NHIỀU địa chỉ
+    FOREIGN KEY (MANV) REFERENCES NHANVIEN(MANV)
+);
+GO
+
+CREATE TABLE MATHANG (
+    MAMH        CHAR(6)       NOT NULL PRIMARY KEY,
+    GIABAN      DECIMAL(12,0) NOT NULL,
+    CHUNGLOAI   NVARCHAR(30)  NOT NULL,
+    MANV        CHAR(6)       NOT NULL,          -- mỗi MH bán bởi ĐÚNG 1 NV (1:N)
+    THOIDIEMBAN DATETIME      NOT NULL,          -- thuộc tính của liên kết BAN
+    FOREIGN KEY (MANV) REFERENCES NHANVIEN(MANV)
+);
+GO
+/* MANV NOT NULL -> bảo đảm tính ĐẦY ĐỦ của phân mảnh DẪN XUẤT.
+   Nếu cho phép NULL phải thêm mảnh MATHANG0 = σ(MANV IS NULL)(MATHANG). */
+
+/* ------------------------------------------------------------
+   2. DỮ LIỆU MINH HỌA
+   ------------------------------------------------------------ */
+INSERT INTO NHANVIEN (MANV, TENNV, NGAYSINH, TUOI, GIOITINH) VALUES
+ ('NV01', N'Nguyễn Văn An',  '1998-05-12', 27, N'Nam'),
+ ('NV02', N'Trần Thị Bích',  '1996-11-03', 29, N'Nữ' ),
+ ('NV03', N'Lê Văn Cường',   '1985-02-20', 40, N'Nam'),
+ ('NV04', N'Phạm Thị Dung',  '1988-07-15', 37, N'Nữ' ),
+ ('NV05', N'Hoàng Văn Em',   '2000-09-30', 25, N'Nam'),
+ ('NV06', N'Vũ Thị Hoa',     '1983-12-08', 42, N'Nữ' );
+GO
+
+INSERT INTO DIACHI (MANV, DIACHI) VALUES
+ ('NV01', N'12 Lê Lợi, Hà Nội'),
+ ('NV01', N'45 Trần Phú, Bắc Ninh'),
+ ('NV02', N'8 Nguyễn Trãi, Hà Nội'),
+ ('NV03', N'102 Hùng Vương, Đà Nẵng'),
+ ('NV03', N'7 Bạch Đằng, Huế'),
+ ('NV04', N'56 Lý Thường Kiệt, Đà Nẵng'),
+ ('NV05', N'33 CMT8, TP. Hồ Chí Minh'),
+ ('NV05', N'19 Võ Văn Tần, TP. Hồ Chí Minh'),
+ ('NV06', N'77 Nguyễn Huệ, Cần Thơ');
+GO
+
+INSERT INTO MATHANG (MAMH, GIABAN, CHUNGLOAI, MANV, THOIDIEMBAN) VALUES
+ ('MH01',  7500000, N'Điện lạnh', 'NV01', '2025-03-05 09:15'),
+ ('MH02',  6200000, N'Điện lạnh', 'NV01', '2025-03-07 14:30'),
+ ('MH03', 12000000, N'Điện tử',   'NV05', '2025-03-08 10:00'),
+ ('MH04', 25000000, N'Điện tử',   'NV05', '2025-03-10 16:45'),
+ ('MH05',  1200000, N'Gia dụng',  'NV03', '2025-03-11 08:20'),
+ ('MH06',  3400000, N'Gia dụng',  'NV03', '2025-03-12 11:05'),
+ ('MH07', 15900000, N'Điện tử',   'NV02', '2025-03-13 09:40'),
+ ('MH08',  4800000, N'Gia dụng',  'NV02', '2025-03-14 15:10'),
+ ('MH09',  9900000, N'Điện lạnh', 'NV04', '2025-03-15 10:25'),
+ ('MH10',  5600000, N'Gia dụng',  'NV04', '2025-03-16 13:50'),
+ ('MH11',  2750000, N'Gia dụng',  'NV06', '2025-03-17 08:55'),
+ ('MH12',  1850000, N'Điện tử',   'NV06', '2025-03-18 17:20');
+GO
+
+/* ------------------------------------------------------------
+   3. HAI ỨNG DỤNG (CÂU 2) - nguồn sinh vị từ đơn giản
+   ------------------------------------------------------------ */
+
+-- ỨNG DỤNG 1: Thống kê doanh số theo tổ bán hàng (Phòng Kinh doanh)
+--             -> NỐI NHANVIEN ⋈ MATHANG, vị từ trên GIOITINH
+SELECT N.MANV, N.TENNV, M.MAMH, M.CHUNGLOAI, M.GIABAN, M.THOIDIEMBAN   -- ƯD1.1
+FROM   NHANVIEN N JOIN MATHANG M ON N.MANV = M.MANV
+WHERE  N.GIOITINH = N'Nam';
+
+SELECT N.MANV, N.TENNV, M.MAMH, M.CHUNGLOAI, M.GIABAN, M.THOIDIEMBAN   -- ƯD1.2
+FROM   NHANVIEN N JOIN MATHANG M ON N.MANV = M.MANV
+WHERE  N.GIOITINH = N'Nữ';
+GO
+
+-- ỨNG DỤNG 2: Quản lý hồ sơ nhân viên theo nhóm tuổi (Phòng Nhân sự)
+--             -> vị từ trên TUOI; ƯD2.3 nối NHANVIEN ⋈ DIACHI
+SELECT MANV, TENNV, NGAYSINH, TUOI, GIOITINH FROM NHANVIEN WHERE TUOI <= 30;  -- ƯD2.1
+SELECT MANV, TENNV, NGAYSINH, TUOI, GIOITINH FROM NHANVIEN WHERE TUOI >  30;  -- ƯD2.2
+
+SELECT N.MANV, N.TENNV, D.DIACHI                                              -- ƯD2.3
+FROM   NHANVIEN N JOIN DIACHI D ON N.MANV = D.MANV
+WHERE  N.TUOI <= 30;
+GO
+
+/* ------------------------------------------------------------
+   4. PHÂN MẢNH NGANG NGUYÊN THỦY TRÊN NHANVIEN (quan hệ CHỦ)
+
+      Pr  = { q1: GIOITINH='Nam', q2: GIOITINH='Nữ',
+              q3: TUOI<=30,       q4: TUOI>30 }
+      COM_MIN -> Pr' = { q1 , q3 }
+      (q2 ⇔ ¬q1 và q4 ⇔ ¬q3 -> không liên quan, bị loại)
+      |M| = 2^2 = 4 hội sơ cấp, không có tổ hợp mâu thuẫn
+   ------------------------------------------------------------ */
+IF OBJECT_ID('NHANVIEN1','U') IS NOT NULL DROP TABLE NHANVIEN1;
+IF OBJECT_ID('NHANVIEN2','U') IS NOT NULL DROP TABLE NHANVIEN2;
+IF OBJECT_ID('NHANVIEN3','U') IS NOT NULL DROP TABLE NHANVIEN3;
+IF OBJECT_ID('NHANVIEN4','U') IS NOT NULL DROP TABLE NHANVIEN4;
+GO
+
+-- n1 = q1 ∧ q3
+SELECT * INTO NHANVIEN1 FROM NHANVIEN WHERE GIOITINH = N'Nam' AND TUOI <= 30;
+-- n2 = q1 ∧ ¬q3
+SELECT * INTO NHANVIEN2 FROM NHANVIEN WHERE GIOITINH = N'Nam' AND TUOI >  30;
+-- n3 = ¬q1 ∧ q3
+SELECT * INTO NHANVIEN3 FROM NHANVIEN WHERE GIOITINH = N'Nữ'  AND TUOI <= 30;
+-- n4 = ¬q1 ∧ ¬q3
+SELECT * INTO NHANVIEN4 FROM NHANVIEN WHERE GIOITINH = N'Nữ'  AND TUOI >  30;
+GO
+
+SELECT N'NHANVIEN1 (Nam, <=30)' AS Manh, * FROM NHANVIEN1;
+SELECT N'NHANVIEN2 (Nam, >30)'  AS Manh, * FROM NHANVIEN2;
+SELECT N'NHANVIEN3 (Nữ, <=30)'  AS Manh, * FROM NHANVIEN3;
+SELECT N'NHANVIEN4 (Nữ, >30)'   AS Manh, * FROM NHANVIEN4;
+GO
+
+/* ------------------------------------------------------------
+   5. PHÂN MẢNH NGANG DẪN XUẤT TRÊN MATHANG (quan hệ THÀNH VIÊN)
+
+      MATHANG_i = MATHANG ⋉ NHANVIEN_i   (nửa nối theo MANV)
+   ------------------------------------------------------------ */
+IF OBJECT_ID('MATHANG1','U') IS NOT NULL DROP TABLE MATHANG1;
+IF OBJECT_ID('MATHANG2','U') IS NOT NULL DROP TABLE MATHANG2;
+IF OBJECT_ID('MATHANG3','U') IS NOT NULL DROP TABLE MATHANG3;
+IF OBJECT_ID('MATHANG4','U') IS NOT NULL DROP TABLE MATHANG4;
+GO
+
+-- Dạng 1 (tường minh nửa nối): SELECT M.* FROM MATHANG M JOIN NHANVIEN1 N ON M.MANV = N.MANV
+-- Dạng 2 (dùng IN) - tương đương, viết gọn hơn:
+SELECT * INTO MATHANG1 FROM MATHANG WHERE MANV IN (SELECT MANV FROM NHANVIEN1);
+SELECT * INTO MATHANG2 FROM MATHANG WHERE MANV IN (SELECT MANV FROM NHANVIEN2);
+SELECT * INTO MATHANG3 FROM MATHANG WHERE MANV IN (SELECT MANV FROM NHANVIEN3);
+SELECT * INTO MATHANG4 FROM MATHANG WHERE MANV IN (SELECT MANV FROM NHANVIEN4);
+GO
+
+SELECT N'MATHANG1 (⋉ NHANVIEN1)' AS Manh, * FROM MATHANG1;
+SELECT N'MATHANG2 (⋉ NHANVIEN2)' AS Manh, * FROM MATHANG2;
+SELECT N'MATHANG3 (⋉ NHANVIEN3)' AS Manh, * FROM MATHANG3;
+SELECT N'MATHANG4 (⋉ NHANVIEN4)' AS Manh, * FROM MATHANG4;
+GO
+
+/* ------------------------------------------------------------
+   6. PHÂN MẢNH NGANG DẪN XUẤT TRÊN DIACHI
+
+      DIACHI_i = DIACHI ⋉ NHANVIEN_i
+   ------------------------------------------------------------ */
+IF OBJECT_ID('DIACHI1','U') IS NOT NULL DROP TABLE DIACHI1;
+IF OBJECT_ID('DIACHI2','U') IS NOT NULL DROP TABLE DIACHI2;
+IF OBJECT_ID('DIACHI3','U') IS NOT NULL DROP TABLE DIACHI3;
+IF OBJECT_ID('DIACHI4','U') IS NOT NULL DROP TABLE DIACHI4;
+GO
+
+SELECT * INTO DIACHI1 FROM DIACHI WHERE MANV IN (SELECT MANV FROM NHANVIEN1);
+SELECT * INTO DIACHI2 FROM DIACHI WHERE MANV IN (SELECT MANV FROM NHANVIEN2);
+SELECT * INTO DIACHI3 FROM DIACHI WHERE MANV IN (SELECT MANV FROM NHANVIEN3);
+SELECT * INTO DIACHI4 FROM DIACHI WHERE MANV IN (SELECT MANV FROM NHANVIEN4);
+GO
+
+SELECT N'DIACHI1' AS Manh, * FROM DIACHI1;
+SELECT N'DIACHI2' AS Manh, * FROM DIACHI2;
+SELECT N'DIACHI3' AS Manh, * FROM DIACHI3;
+SELECT N'DIACHI4' AS Manh, * FROM DIACHI4;
+GO
+
+/* ------------------------------------------------------------
+   7. KIỂM TRA TÍNH ĐÚNG ĐẮN
+   ------------------------------------------------------------ */
+
+-- 7.1 TÁI THIẾT: quan hệ gốc = hợp các mảnh
+SELECT * FROM NHANVIEN1
+UNION ALL SELECT * FROM NHANVIEN2
+UNION ALL SELECT * FROM NHANVIEN3
+UNION ALL SELECT * FROM NHANVIEN4;
+
+SELECT * FROM MATHANG1
+UNION ALL SELECT * FROM MATHANG2
+UNION ALL SELECT * FROM MATHANG3
+UNION ALL SELECT * FROM MATHANG4;
+
+SELECT * FROM DIACHI1
+UNION ALL SELECT * FROM DIACHI2
+UNION ALL SELECT * FROM DIACHI3
+UNION ALL SELECT * FROM DIACHI4;
+GO
+
+-- 7.2 ĐẦY ĐỦ: tổng số bộ các mảnh phải bằng số bộ quan hệ gốc (6 / 12 / 9)
+SELECT N'NHANVIEN' AS QuanHe,
+       (SELECT COUNT(*) FROM NHANVIEN) AS SoBo_TongThe,
+       (SELECT COUNT(*) FROM NHANVIEN1) + (SELECT COUNT(*) FROM NHANVIEN2)
+     + (SELECT COUNT(*) FROM NHANVIEN3) + (SELECT COUNT(*) FROM NHANVIEN4) AS SoBo_CacManh
+UNION ALL
+SELECT N'MATHANG',
+       (SELECT COUNT(*) FROM MATHANG),
+       (SELECT COUNT(*) FROM MATHANG1) + (SELECT COUNT(*) FROM MATHANG2)
+     + (SELECT COUNT(*) FROM MATHANG3) + (SELECT COUNT(*) FROM MATHANG4)
+UNION ALL
+SELECT N'DIACHI',
+       (SELECT COUNT(*) FROM DIACHI),
+       (SELECT COUNT(*) FROM DIACHI1) + (SELECT COUNT(*) FROM DIACHI2)
+     + (SELECT COUNT(*) FROM DIACHI3) + (SELECT COUNT(*) FROM DIACHI4);
+GO
+
+-- 7.3 TÁCH BIỆT: không mã nào xuất hiện ở 2 mảnh (kết quả RỖNG là ĐÚNG)
+SELECT MANV, COUNT(*) AS SoLanXuatHien FROM (
+    SELECT MANV FROM NHANVIEN1 UNION ALL SELECT MANV FROM NHANVIEN2
+    UNION ALL SELECT MANV FROM NHANVIEN3 UNION ALL SELECT MANV FROM NHANVIEN4
+) T GROUP BY MANV HAVING COUNT(*) > 1;
+
+SELECT MAMH, COUNT(*) AS SoLanXuatHien FROM (
+    SELECT MAMH FROM MATHANG1 UNION ALL SELECT MAMH FROM MATHANG2
+    UNION ALL SELECT MAMH FROM MATHANG3 UNION ALL SELECT MAMH FROM MATHANG4
+) T GROUP BY MAMH HAVING COUNT(*) > 1;
+GO
+
+/* ------------------------------------------------------------
+   8. CHỨNG MINH LỢI ÍCH CỦA PHÂN MẢNH DẪN XUẤT
+
+      NHANVIEN ⋈ MATHANG = ∪ (NHANVIEN_i ⋈ MATHANG_i)
+      và NHANVIEN_i ⋈ MATHANG_j = ∅ với mọi i ≠ j
+   ------------------------------------------------------------ */
+
+-- 8.1 Nối CỤC BỘ tại từng trạm (ƯD1 không cần truyền dữ liệu qua mạng)
+SELECT N'S1' AS Tram, N.MANV, N.TENNV, M.MAMH, M.GIABAN
+FROM   NHANVIEN1 N JOIN MATHANG1 M ON N.MANV = M.MANV
+UNION ALL
+SELECT N'S1', N.MANV, N.TENNV, M.MAMH, M.GIABAN
+FROM   NHANVIEN2 N JOIN MATHANG2 M ON N.MANV = M.MANV
+UNION ALL
+SELECT N'S2', N.MANV, N.TENNV, M.MAMH, M.GIABAN
+FROM   NHANVIEN3 N JOIN MATHANG3 M ON N.MANV = M.MANV
+UNION ALL
+SELECT N'S2', N.MANV, N.TENNV, M.MAMH, M.GIABAN
+FROM   NHANVIEN4 N JOIN MATHANG4 M ON N.MANV = M.MANV;
+GO
+
+-- 8.2 Nối CHÉO i ≠ j phải RỖNG (kết quả 0 dòng là ĐÚNG)
+SELECT COUNT(*) AS SoBo_NoiCheo_Phai_Bang_0 FROM (
+    SELECT N.MANV FROM NHANVIEN1 N JOIN MATHANG2 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN1 N JOIN MATHANG3 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN1 N JOIN MATHANG4 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN2 N JOIN MATHANG1 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN2 N JOIN MATHANG3 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN2 N JOIN MATHANG4 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN3 N JOIN MATHANG1 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN3 N JOIN MATHANG2 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN3 N JOIN MATHANG4 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN4 N JOIN MATHANG1 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN4 N JOIN MATHANG2 M ON N.MANV = M.MANV
+    UNION ALL SELECT N.MANV FROM NHANVIEN4 N JOIN MATHANG3 M ON N.MANV = M.MANV
+) T;
+GO

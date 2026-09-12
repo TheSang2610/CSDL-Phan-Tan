@@ -1,0 +1,19 @@
+# File nén trùng lặp với thư mục đã có sẵn trong kho
+*.rar
+*.zip
+
+# File tạm của Windows / SSMS
+Thumbs.db
+desktop.ini
+*.bak
+*.trn
+*.ldf
+*.mdf
+*.ndf
+*.tmp
+~$*
+
+# Thư mục làm việc của SSMS / Visual Studio
+.vs/
+*.suo
+*.user
