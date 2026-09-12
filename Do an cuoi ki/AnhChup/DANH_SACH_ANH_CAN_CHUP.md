@@ -9,7 +9,7 @@ Chụp nhanh bằng **`Windows + Shift + S`**, dán vào Paint rồi lưu, hoặ
 
 | Tên file phải đặt | Màn hình | Cách lấy |
 |---|---|---|
-| `01_DatabaseDiagram_9Bang.png` | Sơ đồ quan hệ chín bảng | SSMS → `KhoA` → **Database Diagrams** → chuột phải → **New Database Diagram** → thêm cả 9 bảng → phóng vừa màn hình → chụp |
+| `01_DatabaseDiagram_SSMS.png` | Sơ đồ quan hệ chín bảng | SSMS → `KhoA` → **Database Diagrams** → chuột phải → **New Database Diagram** → thêm cả 9 bảng → phóng vừa màn hình → chụp |
 
 Ảnh này được chèn vào **Chương II mục 2.1** của cuốn báo cáo. Tên file phải đúng
 từng ký tự, vì script sinh báo cáo gọi đích danh tên đó.
