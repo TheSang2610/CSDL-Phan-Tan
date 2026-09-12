@@ -21,3 +21,7 @@ desktop.ini
 # Ban sao database mang di - file nhi phan, tao lai duoc bang lenh BACKUP
 BanSaoMangDi/
 *.bak
+
+# Bai tap giua ky - nop o cho khac, khong de trong kho nay
+BT01_Nhom02/
+BT02_Nhom02/

@@ -104,5 +104,11 @@ Toàn bộ nằm trong `Do an cuoi ki/SQL/`.
 Nếu tên máy không phải `MIGNON`, tìm và thay `Mignon\` trong các script `05`–`10`
 bằng tên máy của bạn, đồng thời cập nhật cột `ServerName` trong bảng `Kho`.
 
-> 🔒 Kho này để **private**. Các script `05` và `06` có chứa mật khẩu tài khoản
-> `sa` của môi trường lab cục bộ. Đừng chuyển sang public khi chưa tách mật khẩu ra.
+> ⚠️ **Về cấu hình bảo mật của đồ án.** Các script `05`, `06`, `11` ghi thẳng mật
+> khẩu tài khoản `sa` của môi trường phòng thực hành. Đó là mật khẩu đặt cố ý cho
+> lab, không dùng lại ở bất kỳ máy nào khác. Cấu hình MS DTC cũng đặt
+> **No Authentication Required** vì ba máy không nằm trong domain — môi trường
+> thật phải dùng **Mutual Authentication**.
+>
+> Ba máy của nhóm chỉ nối với nhau qua mạng ảo ZeroTier, không mở cổng ra
+> Internet. Sau buổi bảo vệ nên đổi mật khẩu `sa` hoặc gỡ ba instance đi.
