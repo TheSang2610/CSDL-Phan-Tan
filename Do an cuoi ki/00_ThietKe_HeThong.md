@@ -118,6 +118,159 @@ PhieuDieuChuyen ( MaDC , MaKhoNguon , MaKhoDich , MaVT , SoLuong ,
 
 ---
 
+### 2.4. Mô hình thực thể liên kết (ERD)
+
+> Đáp ứng mục **2.2.1.f — Phân tích CSDL (mô hình thực thể liên kết)**
+
+#### a) Các thực thể và thuộc tính
+
+Gạch chân bằng dấu `#` là **khóa chính**, dấu `→` là **khóa ngoại**.
+
+```
+NHACUNGCAP                       VATTU                            KHO
+┌──────────────────┐             ┌────────────────────┐           ┌──────────────────┐
+│ # MaNCC          │             │ # MaVT             │           │ # MaKho          │
+│   TenNCC         │             │   TenVT            │           │   TenKho         │
+│   DiaChi         │             │   DonViTinh        │           │   DiaChi         │
+│   DienThoai      │             │   DonGia           │           │   ServerName     │
+│   Email          │             │   MucTonToiThieu   │           └──────────────────┘
+└──────────────────┘             │ → MaNCC            │
+                                 └────────────────────┘
+
+PHIEUNHAP                        PHIEUXUAT                        PHIEUDIEUCHUYEN
+┌──────────────────┐             ┌──────────────────┐             ┌────────────────────┐
+│ # MaPN           │             │ # MaPX           │             │ # MaDC             │
+│ → MaKho          │             │ → MaKho          │             │ → MaKhoNguon       │
+│ → MaNCC          │             │   NgayXuat       │             │ → MaKhoDich        │
+│   NgayNhap       │             │   NguoiNhan      │             │ → MaVT             │
+│   NguoiLap       │             │   NguoiLap       │             │   SoLuong          │
+│   TrangThai      │             │   TrangThai      │             │   NgayLap          │
+└──────────────────┘             └──────────────────┘             │   TrangThai        │
+                                                                  │   GhiChu           │
+                                                                  └────────────────────┘
+```
+
+#### b) Ba mối kết hợp nhiều-nhiều
+
+Trong mô hình ER, ba bảng `TonKho`, `ChiTietNhap`, `ChiTietXuat` **không phải là thực thể**
+mà là **mối kết hợp M:N có thuộc tính riêng**. Chúng chỉ trở thành bảng khi chuyển sang
+mô hình quan hệ.
+
+```
+        ┌─────────┐                                      ┌─────────┐
+        │   KHO   │◇────────────< TON KHO >─────────────◇│  VATTU  │
+        └─────────┘   M                              N   └─────────┘
+                            thuộc tính của mối kết hợp:
+                                 SoLuong, NgayCapNhat, RowVer
+
+
+        ┌───────────┐                                    ┌─────────┐
+        │ PHIEUNHAP │◇──────< CHI TIET NHAP >───────────◇│  VATTU  │
+        └───────────┘  1                             N   └─────────┘
+                            thuộc tính: SoLuong, DonGia
+
+
+        ┌───────────┐                                    ┌─────────┐
+        │ PHIEUXUAT │◇──────< CHI TIET XUAT >───────────◇│  VATTU  │
+        └───────────┘  1                             N   └─────────┘
+                            thuộc tính: SoLuong, DonGia
+```
+
+#### c) Bảng tổng hợp mối kết hợp và bản số
+
+| Mối kết hợp | Thực thể A | Bản số | Thực thể B | Ý nghĩa nghiệp vụ |
+|---|---|:---:|---|---|
+| **cung cấp** | `NHACUNGCAP` | 1 : N | `VATTU` | Một nhà cung cấp bán nhiều vật tư; mỗi vật tư do **một** nhà cung cấp chính |
+| **TỒN KHO** | `KHO` | M : N | `VATTU` | Một kho chứa nhiều vật tư, một vật tư nằm ở nhiều kho — **có thuộc tính `SoLuong`** |
+| **lập tại** | `KHO` | 1 : N | `PHIEUNHAP` | Mỗi phiếu nhập thuộc đúng một kho |
+| **nhập từ** | `NHACUNGCAP` | 1 : N | `PHIEUNHAP` | Mỗi phiếu nhập mua của một nhà cung cấp |
+| **CHI TIẾT NHẬP** | `PHIEUNHAP` | M : N | `VATTU` | Một phiếu có nhiều dòng hàng — **có `SoLuong`, `DonGia`** |
+| **lập tại** | `KHO` | 1 : N | `PHIEUXUAT` | Mỗi phiếu xuất thuộc đúng một kho |
+| **CHI TIẾT XUẤT** | `PHIEUXUAT` | M : N | `VATTU` | Một phiếu có nhiều dòng hàng |
+| **chuyển đi** | `KHO` | 1 : N | `PHIEUDIEUCHUYEN` | Vai trò **kho nguồn** |
+| **chuyển đến** | `KHO` | 1 : N | `PHIEUDIEUCHUYEN` | Vai trò **kho đích** |
+| **chuyển vật tư** | `VATTU` | 1 : N | `PHIEUDIEUCHUYEN` | Mỗi phiếu điều chuyển một loại vật tư |
+
+> **Điểm đáng nêu khi thuyết trình:** thực thể `KHO` tham gia `PHIEUDIEUCHUYEN` **hai
+> lần với hai vai trò khác nhau** (nguồn và đích). Đây là *mối kết hợp đệ quy có vai
+> trò* — cũng chính là thực thể khiến hệ thống **bắt buộc** phải dùng giao tác phân
+> tán, vì một phiếu điều chuyển đụng tới dữ liệu nằm ở **hai site vật lý khác nhau**.
+
+#### d) Ràng buộc toàn vẹn mức lược đồ
+
+| # | Ràng buộc | Cưỡng chế bằng |
+|---|---|---|
+| R1 | `TonKho.SoLuong >= 0` — không có tồn kho âm | `CHECK CK_TonKho_SL` |
+| R2 | Mỗi site chỉ giữ tồn kho của chính nó | `CHECK CK_TonKho_Manh` + trigger |
+| R3 | Kho nguồn khác kho đích | `CHECK CK_DC_KhacKho` |
+| R4 | Phiếu điều chuyển phải liên quan Kho Trung tâm | `CHECK CK_DC_LienQuan` |
+| R5 | Dòng chi tiết phải thuộc phiếu của site mình | **Trigger** (cần phép nối) |
+| R6 | Danh mục chỉ sửa được ở Kho Trung tâm | **Trigger** `NOT FOR REPLICATION` |
+| R7 | Không xoá chứng từ đã `HOAN_TAT` | **Trigger** `INSTEAD OF DELETE` |
+
+---
+
+### 2.5. Sơ đồ quan hệ giữa các bảng (Database Diagram)
+
+> Đáp ứng mục **2.2.2.a2 — mô hình quan hệ giữa các bảng (diagram)**
+
+#### a) Sơ đồ khóa ngoại
+
+```
+        NHACUNGCAP                              KHO
+             │ 1                             1 │ │ 1
+             │                                 │ └──────────────┐
+     ┌───────┴───────┐              ┌──────────┘                │
+     │ N             │ N            │ N                         │ N
+  VATTU          PHIEUNHAP ◄────────┘                      PHIEUXUAT
+     │ 1              │ 1                                       │ 1
+     │                │ N                                       │ N
+     │           CHITIETNHAP                              CHITIETXUAT
+     │                │ N                                       │ N
+     └────────────────┴──────────────────────────────────────────┘
+     │ 1                                    (MaVT)
+     │
+     ├──── N ──► TONKHO ◄── N ──── KHO           (khóa chính kép MaKho + MaVT)
+     │
+     └──── N ──► PHIEUDIEUCHUYEN ◄── N ──── KHO  (hai lần: nguồn và đích)
+```
+
+#### b) Danh sách khóa ngoại đầy đủ
+
+| # | Tên ràng buộc | Bảng con | Cột | Trỏ tới bảng cha |
+|---|---|---|---|---|
+| 1 | `FK_VatTu_NCC` | `VatTu` | `MaNCC` | `NhaCungCap` |
+| 2 | `FK_TonKho_Kho` | `TonKho` | `MaKho` | `Kho` |
+| 3 | `FK_TonKho_VatTu` | `TonKho` | `MaVT` | `VatTu` |
+| 4 | `FK_PN_Kho` | `PhieuNhap` | `MaKho` | `Kho` |
+| 5 | `FK_PN_NCC` | `PhieuNhap` | `MaNCC` | `NhaCungCap` |
+| 6 | `FK_CTN_PN` | `ChiTietNhap` | `MaPN` | `PhieuNhap` |
+| 7 | `FK_CTN_VatTu` | `ChiTietNhap` | `MaVT` | `VatTu` |
+| 8 | `FK_PX_Kho` | `PhieuXuat` | `MaKho` | `Kho` |
+| 9 | `FK_CTX_PX` | `ChiTietXuat` | `MaPX` | `PhieuXuat` |
+| 10 | `FK_CTX_VatTu` | `ChiTietXuat` | `MaVT` | `VatTu` |
+
+#### c) Cách xuất diagram thật từ SSMS để chụp ảnh
+
+1. Trong **Object Explorer**, bung `Mignon\KHO_A` → `Databases` → `KhoA`
+2. Chuột phải mục **Database Diagrams** → **New Database Diagram**
+3. Lần đầu SSMS hỏi *"This database does not have one or more of the support objects
+   required to use database diagramming"* → bấm **Yes**
+4. Cửa sổ **Add Table** hiện ra → chọn **cả 9 bảng** (giữ `Ctrl` bấm từng cái, hoặc
+   bấm bảng đầu rồi `Shift` + bảng cuối) → bấm **Add** → bấm **Close**
+5. Chín bảng hiện ra kèm các đường nối khóa ngoại. Sắp xếp lại cho gọn, hoặc chuột
+   phải vùng trống → **Arrange Tables** để SSMS tự xếp
+6. 📷 Chụp toàn bộ sơ đồ
+   → lưu `AnhChup\2.2_ThietKe\01_DatabaseDiagram_9Bang.png`
+7. Chuột phải vùng trống → **Save As** → đặt tên `DIAGRAM_KhoVatTu` để giữ lại
+
+> Đây là **ảnh bắt buộc** của mục 2.2.2.a2 và cũng dùng luôn cho mục 2.2.1.f (ERD).
+> Nếu muốn đẹp hơn để in báo cáo, có thể vẽ lại bằng **draw.io** theo bảng khóa
+> ngoại ở phần (b) — nhưng ảnh SSMS có giá trị minh chứng cao hơn vì nó chụp từ
+> CSDL thật đang chạy.
+
+---
+
 ## 3. Phân tích chức năng và tần suất truy cập
 
 ### 3.1. Các chức năng chính
@@ -159,7 +312,66 @@ PhieuDieuChuyen ( MaDC , MaKhoNguon , MaKhoDich , MaVT , SoLuong ,
 | `QuanTriDanhMuc` | Chỉ Kho Trung tâm | Toàn quyền trên `VatTu`, `NhaCungCap` (nguồn nhân bản) |
 | `BanGiamDoc` | Kho Trung tâm | `SELECT` toàn hệ thống qua Linked Server (F4) |
 
-Ràng buộc "chỉ thao tác trên kho của mình" được cưỡng chế bằng **CHECK constraint** + **trigger** tại mỗi site (xem `SQL/09_PhanQuyen_Trigger.sql`).
+Ràng buộc "chỉ thao tác trên kho của mình" được cưỡng chế bằng **CHECK constraint** + **trigger** tại mỗi site (xem `SQL/10_PhanQuyen_Trigger.sql`).
+
+---
+
+### 3.4. Chức năng ở máy trạm và máy chủ
+
+> Đáp ứng mục **2.2.1.e — Chức năng ở máy trạm, máy chủ**
+
+Hệ thống chia làm hai tầng. Nguyên tắc xuyên suốt: **đẩy việc xử lý xuống máy chủ,
+máy trạm chỉ lo giao diện** — vì trong CSDL phân tán, thứ đắt nhất là dữ liệu chạy
+trên đường truyền.
+
+#### a) Máy chủ (Server) — nơi đặt SQL Server instance
+
+| Nhóm chức năng | Cụ thể | Vì sao phải ở máy chủ |
+|---|---|---|
+| **Lưu trữ mảnh dữ liệu** | Giữ `TonKho`, chứng từ của riêng kho mình | Định nghĩa của phân mảnh |
+| **Cưỡng chế toàn vẹn** | `CHECK`, khóa ngoại, 6 trigger | Máy trạm có thể bị sửa mã, máy chủ thì không |
+| **Xử lý nghiệp vụ** | `sp_NhapKho`, `sp_XuatKho`, `sp_DieuChuyenVatTu` | Đặt khóa và kiểm tra tồn phải làm sát dữ liệu |
+| **Điều khiển tương tranh** | `UPDLOCK`, `HOLDLOCK`, phát hiện deadlock | Chỉ bộ quản trị CSDL làm được |
+| **Giao tác phân tán** | `BEGIN DISTRIBUTED TRANSACTION` qua MS DTC | Cần hai pha commit giữa hai máy chủ |
+| **Nhân bản** | Log Reader + Distribution Agent | Chạy nền, không cần người dùng bật |
+| **Truy vấn phân tán** | Linked Server, `OPENQUERY` | Gom dữ liệu 3 site rồi mới trả về |
+| **Phân quyền** | 4 vai trò, `GRANT` / `DENY` | Máy trạm không được tự quyết quyền |
+| **Ghi nhật ký kiểm toán** | Bảng `NhatKyKiemToan` | Ghi tự động bằng trigger, không ai tắt được |
+
+#### b) Máy trạm (Client) — máy nhân viên kho
+
+| Nhóm chức năng | Cụ thể |
+|---|---|
+| **Giao diện nhập liệu** | Màn hình lập phiếu nhập, phiếu xuất, phiếu điều chuyển |
+| **Kiểm tra sơ bộ** | Số lượng phải > 0, ngày hợp lệ, không bỏ trống — **chỉ để đỡ phiền người dùng**, không thay thế kiểm tra ở máy chủ |
+| **Gọi thủ tục** | `EXEC sp_XuatKho ...` — **không** gửi câu `INSERT` / `UPDATE` trực tiếp |
+| **Hiển thị kết quả** | Bảng tồn kho, cảnh báo dưới mức tối thiểu, thống kê |
+| **In chứng từ** | In phiếu nhập / xuất / điều chuyển |
+| **Bắt lỗi và thử lại** | Gặp `Msg 1205` (deadlock) thì tự chạy lại giao tác |
+
+#### c) Ranh giới giữa hai tầng — điều quan trọng nhất
+
+Máy trạm **bị `DENY` quyền ghi thẳng** vào `TonKho`, `PhieuNhap`, `PhieuXuat`. Nó chỉ
+có `EXECUTE` trên các thủ tục. Nhờ cơ chế **chuỗi sở hữu (ownership chaining)**, thủ
+tục vẫn ghi được vào bảng dù người gọi bị cấm.
+
+Hệ quả: **mọi thay đổi tồn kho bắt buộc đi qua đoạn mã đã kiểm tra tồn, đã đặt khóa
+và đã ghi chứng từ.** Không có đường tắt nào, kể cả khi ai đó mở SSMS gõ tay.
+
+```
+   MÁY TRẠM                              MÁY CHỦ (site sở tại)
+   ┌────────────────────┐                ┌───────────────────────────────────┐
+   │ Màn hình xuất kho  │                │  sp_XuatKho                       │
+   │                    │  EXEC + TVP    │   ├─ kiểm tra tồn (UPDLOCK)        │
+   │  [Lưu phiếu] ──────┼───────────────►│   ├─ sinh mã phiếu                │
+   │                    │                │   ├─ ghi PhieuXuat + ChiTietXuat  │
+   │  ◄─────────────────┼────────────────┤   └─ trừ TonKho                   │
+   │   mã phiếu / lỗi   │  kết quả       │         ▲                         │
+   └────────────────────┘                │         │ trigger ghi nhật ký     │
+                                         │      NhatKyKiemToan               │
+        ✘ DENY INSERT/UPDATE/DELETE      └───────────────────────────────────┘
+          trực tiếp lên bảng
+```
 
 ---
 
@@ -360,6 +572,123 @@ Sẽ so sánh hai cách và đo `STATISTICS IO/TIME`:
 | `PhieuDieuChuyen` | ✔ | ✔ | ✔ | Ghi 2 site qua giao tác phân tán |
 
 **Ghi chú:** ba site dùng **cùng một tên bảng** `TonKho` (không đặt tên `TonKho_A`) — mảnh được xác định bởi **vị trí site** cộng với `CHECK (MaKho = 'KHO_A')`. Cách này giúp câu lệnh ứng dụng giống hệt nhau ở mọi site, đúng tinh thần **trong suốt phân mảnh (fragmentation transparency)**.
+
+### 9.1. Sơ đồ định vị
+
+> Đáp ứng mục **2.2.2.a7 — thiết kế định vị và vẽ sơ đồ định vị**
+
+```
+                    ╔═══════════════════════════════════════════╗
+                    ║  S1 — KHO TRUNG TÂM  (Hà Nội)             ║
+                    ║  MIGNON\KHO_A  ·  cổng 1440  ·  DB KhoA   ║
+                    ╠═══════════════════════════════════════════╣
+                    ║  MẢNH RIÊNG                               ║
+                    ║    TonKho_A          10 dòng              ║
+                    ║    PhieuNhap_A  + ChiTietNhap_A           ║
+                    ║    PhieuXuat_A  + ChiTietXuat_A           ║
+                    ║  BẢN GỐC DANH MỤC  (Publisher)            ║
+                    ║    VatTu · NhaCungCap · Kho               ║
+                    ║  VAI TRÒ PHÂN TÁN                         ║
+                    ║    Publisher + Distributor                ║
+                    ║    Điều phối giao tác phân tán            ║
+                    ╚════════╦═════════════════════════╦════════╝
+                             ║                         ║
+          Replication ───────╢                         ╟─────── Replication
+          (đẩy danh mục)     ║                         ║      (đẩy danh mục)
+                             ▼                         ▼
+   ╔═══════════════════════════════╗   ╔═══════════════════════════════╗
+   ║  S2 — KHO MIỀN BẮC            ║   ║  S3 — KHO MIỀN NAM            ║
+   ║  MIGNON\KHO_B · 1441 · KhoB   ║   ║  MIGNON\KHO_C · 1442 · KhoC   ║
+   ╠═══════════════════════════════╣   ╠═══════════════════════════════╣
+   ║  MẢNH RIÊNG                   ║   ║  MẢNH RIÊNG                   ║
+   ║    TonKho_B         7 dòng    ║   ║    TonKho_C         7 dòng    ║
+   ║    PhieuNhap_B + ChiTietNhap_B║   ║    PhieuNhap_C + ChiTietNhap_C║
+   ║    PhieuXuat_B + ChiTietXuat_B║   ║    PhieuXuat_C + ChiTietXuat_C║
+   ║  BẢN SAO DANH MỤC (chỉ đọc)   ║   ║  BẢN SAO DANH MỤC (chỉ đọc)   ║
+   ║    VatTu · NhaCungCap · Kho   ║   ║    VatTu · NhaCungCap · Kho   ║
+   ║  VAI TRÒ: Subscriber          ║   ║  VAI TRÒ: Subscriber          ║
+   ╚═══════════╦═══════════════════╝   ╚═══════════╦═══════════════════╝
+               ║                                   ║
+               ╚═══════════════════════════════════╝
+                     Linked Server hai chiều
+            (truy vấn phân tán · giao tác 2PC qua MS DTC)
+
+   ─────────────────────────────────────────────────────────────────────
+   CHÚ GIẢI
+     ═══►   Replication — một chiều, Publisher đẩy xuống Subscriber
+     ═══    Linked Server — hai chiều, dùng cho đọc và cho 2PC
+     Mảnh riêng   : chỉ site đó có, không site nào khác giữ bản sao
+     Bản sao      : ba site giữ ba bản giống hệt nhau
+   ─────────────────────────────────────────────────────────────────────
+```
+
+**Căn cứ định vị** — vì sao đặt mảnh nào ở đâu:
+
+| Quyết định | Căn cứ từ bảng tần suất §3.2 |
+|---|---|
+| Mảnh `TonKho_i` đặt tại site `i` | F1+F2+F3 chiếm **89%** lượt truy cập và **hoàn toàn cục bộ theo kho** → đặt tại chỗ thì 89% nghiệp vụ không đụng tới mạng |
+| Chứng từ đi theo kho lập nó | Phiếu nhập/xuất chỉ được đọc lại bởi chính kho đó |
+| Danh mục **nhân bản** thay vì phân mảnh | Ghi 6 lần/ngày nhưng đọc ở mọi nơi, mọi lúc → tỷ lệ đọc/ghi rất cao, đúng điều kiện lý tưởng để nhân bản |
+| Publisher đặt ở KHO_A | F6 (sửa danh mục) **chỉ xảy ra ở Kho Trung tâm** |
+| Distributor đặt chung KHO_A | Hệ ba site nhỏ, tách Distributor riêng không đáng |
+
+### 9.2. Mô hình hệ thống tại chi nhánh và toàn hệ thống
+
+> Đáp ứng mục **2.2.2.b3 — thiết kế mô hình front end và back end**
+
+#### a) Tại một chi nhánh
+
+```
+┌─────────────────────── MỘT CHI NHÁNH KHO ────────────────────────┐
+│                                                                   │
+│   FRONT END                        BACK END                       │
+│   ┌────────────────────┐           ┌───────────────────────────┐  │
+│   │ Máy nhân viên kho  │           │  SQL Server instance      │  │
+│   │  · lập phiếu nhập  │  EXEC     │   · 9 bảng (mảnh riêng +  │  │
+│   │  · lập phiếu xuất  ├──────────►│     bản sao danh mục)     │  │
+│   │  · tra tồn tại chỗ │  thủ tục  │   · 5 thủ tục nghiệp vụ   │  │
+│   │  · in chứng từ     │◄──────────┤   · 6 trigger bảo vệ      │  │
+│   └────────────────────┘  kết quả  │   · 4 vai trò phân quyền  │  │
+│                                    │   · SQL Agent             │  │
+│   ┌────────────────────┐           │   · MS DTC                │  │
+│   │ Máy trưởng kho     ├──────────►│                           │  │
+│   │  · duyệt điều chuyển│          └───────────┬───────────────┘  │
+│   │  · xem nhật ký     │                       │                  │
+│   └────────────────────┘                       │                  │
+└─────────────────────────────────────────────────┼──────────────────┘
+                                                  │
+                                    ra mạng WAN / VPN ZeroTier
+```
+
+#### b) Toàn hệ thống
+
+```
+   TẦNG NGƯỜI DÙNG (FRONT END)
+   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+   │ NV kho A     │  │ NV kho B     │  │ NV kho C     │  │ Ban giám đốc │
+   │ Trưởng kho A │  │ Trưởng kho B │  │ Trưởng kho C │  │ QT danh mục  │
+   └───────┬──────┘  └───────┬──────┘  └───────┬──────┘  └───────┬──────┘
+           │                 │                 │                 │
+   ════════╪═════════════════╪═════════════════╪═════════════════╪════════
+                    MẠNG RIÊNG ẢO — ZeroTier (dải 10.147.x.x)
+   ════════╪═════════════════╪═════════════════╪═════════════════╪════════
+           │                 │                 │                 │
+   TẦNG CSDL (BACK END)      │                 │                 │
+   ┌───────▼──────┐  ┌───────▼──────┐  ┌───────▼──────┐          │
+   │  KHO_A :1440 │  │  KHO_B :1441 │  │  KHO_C :1442 │◄─────────┘
+   │  Publisher   │  │  Subscriber  │  │  Subscriber  │   đọc toàn hệ thống
+   │  Distributor │  │              │  │              │   qua Linked Server
+   └───────┬──────┘  └───────┬──────┘  └───────┬──────┘
+           │                 │                 │
+           └────── Linked Server + MS DTC ─────┘
+                  (2PC khi điều chuyển hàng)
+```
+
+| Tầng | Thành phần | Trách nhiệm |
+|---|---|---|
+| **Front end** | Ứng dụng / SSMS trên máy người dùng | Giao diện, kiểm tra sơ bộ, gọi thủ tục, hiển thị, in |
+| **Mạng** | ZeroTier + TCP/IP cổng 1440–1442 | Nối ba chi nhánh ở ba tỉnh thành một mạng LAN ảo |
+| **Back end** | Ba SQL Server instance | Lưu mảnh, cưỡng chế toàn vẹn, khóa, 2PC, nhân bản, phân quyền |
 
 ---
 

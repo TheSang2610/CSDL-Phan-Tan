@@ -69,25 +69,25 @@
 | b | **Bảng tần suất truy cập tại các vị trí** | thiết kế §3.2 | ✅ |
 | c | **Phân quyền cho các nhóm đối tượng** | thiết kế §3.3 + script `10` (4 vai trò) | ✅ **đã cài đặt cả 3 site** |
 | d | **Phân tích chức năng của từng vị trí** *(mục đỏ trong đề cương)* | thiết kế §3.1 + §1.1 | ✅ |
-| e | Chức năng ở máy trạm, máy chủ | cần bổ sung phần front-end/back-end | ⬜ |
-| f | Phân tích CSDL — **mô hình thực thể liên kết (ERD)** | cần vẽ ERD 9 thực thể | ⬜ |
+| e | Chức năng ở máy trạm, máy chủ | thiết kế **§3.4** — 2 bảng + sơ đồ ranh giới | ✅ |
+| f | Phân tích CSDL — **mô hình thực thể liên kết (ERD)** | thiết kế **§2.4** — thực thể, 3 mối M:N, bản số, 7 ràng buộc | ✅ |
 
 ### 2.2.2. Thiết kế
 
 | Mục | Nội dung | Nguồn | Trạng thái |
 |---|---|---|---|
 | a1 | Tên bảng, cấu trúc các bảng | thiết kế §2.2, §2.3 | ✅ |
-| a2 | **Diagram quan hệ giữa các bảng** | cần xuất Database Diagram từ SSMS | ⬜ |
+| a2 | **Diagram quan hệ giữa các bảng** | thiết kế **§2.5** — 10 khóa ngoại + cách xuất từ SSMS | ✅ tài liệu, ⬜ chờ chụp ảnh |
 | a3 | Lược đồ phục vụ **phân mảnh ngang** | thiết kế §4.1 | ✅ |
 | a4 | Lược đồ phục vụ **phân mảnh ngang dẫn xuất** | thiết kế §4.2 | ✅ |
 | a5 | Lược đồ phục vụ **nhân bản** | thiết kế §5 | ✅ |
 | a6 | **Lược đồ ánh xạ** *(mục đỏ)* | thiết kế §10 — 4 tầng | ✅ |
-| a7 | **Thiết kế định vị + vẽ sơ đồ định vị** | thiết kế §9 | ✅ bảng, ⬜ vẽ sơ đồ |
+| a7 | **Thiết kế định vị + vẽ sơ đồ định vị** | thiết kế §9 bảng + **§9.1 sơ đồ** + căn cứ định vị | ✅ |
 | a8 | **Đồng bộ hóa** | thiết kế §5 | ✅ |
 | a9 | **Thiết kế kiến trúc hệ thống** | thiết kế §1.2 | ✅ |
 | b1 | QTLPT: **Ngang hàng hay Client/Server** | thiết kế §1.2 — lai hai kiểu, có giải thích | ✅ |
 | b2 | QTLPT: **Đường đồng bộ hóa, LinkServer** | thiết kế §1.1 sơ đồ + §8 | ✅ |
-| b3 | **Mô hình hệ thống tại chi nhánh và toàn hệ thống (front end / back end)** | ⬜ cần vẽ thêm | ⬜ |
+| b3 | **Mô hình hệ thống tại chi nhánh và toàn hệ thống (front end / back end)** | thiết kế **§9.2** — 2 sơ đồ + bảng 3 tầng | ✅ |
 
 ### 3. Cài đặt vật lý thực tế
 
@@ -96,7 +96,7 @@
 | 3.1 | **Cài đặt VPN** — ZeroTier | 4 ảnh | 🔄 có `HUONG_DAN_ZEROTIER_3MAY.md` — chờ bạn cài |
 | 3.2 | **Tạo đường link kết nối mạng giữa các server** | 7 ảnh | 🔄 có `BatTCPIP_VaFirewall.ps1` — chờ chạy Admin |
 | 3.3 | **Cài đặt SQL Server** + print screen từng màn hình | ~16 ảnh | ✅ 18 ảnh (thư mục `ảnh` + `99_SSMS_3Instance`) |
-| 3.4 | **Kiểm tra dịch vụ Agent** | 3 ảnh | ⬜ chụp Configuration Manager (dễ, 2 phút) |
+| 3.4 | **Kiểm tra dịch vụ Agent** | 2 ảnh | 🔄 đã xem qua: 7/7 service Running+Automatic — ⬜ chờ lưu ảnh vào thư mục |
 | 3.5 | **Tạo link CSDL giữa các Server** + print screen | 4 ảnh | ✅ đủ 4 ảnh |
 | 3.6 | **Tạo Publication** + print screen | 7 ảnh | ✅ 4 ảnh cốt lõi (đủ minh chứng) |
 | 3.7a | Thử giao tác — **Nhập dữ liệu** | 2 ảnh | ✅ script `04` đã chạy |
@@ -126,7 +126,7 @@
 
 ```
 Cài đặt 3 instance      ████████████████████  100%   KHO_A/B/C đều Running, Developer Ed.
-Thiết kế hệ thống       ████████████████████  100%   00_ThietKe_HeThong.md
+Thiết kế hệ thống       ████████████████████  100%   00_ThietKe_HeThong.md (đủ ERD, diagram, định vị, FE/BE)
 Script tạo CSDL         ████████████████████  100%   01, 02, 03   ĐÃ CHẠY THẬT cả 3 site
 Thủ tục nghiệp vụ       ████████████████████  100%   04           ĐÃ CHẠY THẬT cả 3 site
 Linked Server (3.5)     ████████████████████  100%   05           6/6 link THÔNG
@@ -135,7 +135,7 @@ Giao tác phân tán 2PC   █████████████████�
 Concurrency             ████████████████████  100%   08   C1/C2/C3/C4 ĐỀU ĐÚNG
 Distributed query       ████████████████████  100%   09   9 PHẦN, exit code 0
 Trigger + phân quyền    ████████████████████  100%   10   6 trigger + 4 vai trò, 3 site OK
-Chụp ảnh minh chứng     ██████████████░░░░░░   70%   32 ảnh (3.3, 3.5, 3.6, 3.7e)
+Chụp ảnh minh chứng     ████████████████░░░░   80%   34 ảnh — thiếu 3.1, 3.2, 3.4, diagram
 Viết báo cáo            ░░░░░░░░░░░░░░░░░░░░    0%   làm sau cùng
 ```
 
