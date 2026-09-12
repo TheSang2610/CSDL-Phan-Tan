@@ -16,7 +16,7 @@
 
    Cách xử lý: Linked Server có HAI phần tách rời nhau
         @server   = TÊN GỌI  ->  giữ nguyên 'Mignon\KHO_B'
-        @datasrc  = ĐỊA CHỈ THẬT ->  đổi thành '10.147.20.51,1441'
+        @datasrc  = ĐỊA CHỈ THẬT ->  đổi thành '10.91.229.18,1441'
 
    Nghĩa là ta giữ nguyên CÁI TÊN mà mọi script đang dùng, chỉ đổi ĐỊA CHỈ mà
    cái tên đó trỏ tới. Giống như đổi số nhà trong danh bạ nhưng vẫn gọi người
@@ -34,17 +34,18 @@
    ############################################################################
 
    Lấy IP ảo ở đâu:
-     Vào  https://my.zerotier.com  -> bấm vào network của nhóm -> kéo xuống
-     mục Members -> cột "Managed IPs" của từng máy.
+     Vào  https://my.zerotier.com  -> mở network  a581878f7d00676e  của nhóm
+     -> tab Member Devices -> đọc cột "ZT IP" của từng máy.
+     Máy nào chưa có dấu Authorized thì tích ô Auth cho nó trước.
 
    Lấy tên máy chủ thật ở đâu:
      Mỗi bạn mở SSMS trên máy mình, chạy:   SELECT @@SERVERNAME
      rồi đọc kết quả cho bạn ghi lại.
    ############################################################################ */
 
-DECLARE @IP_KhoA      NVARCHAR(50)  = N'10.147.20.35';   -- <<< SỬA: IP ảo máy bạn
-DECLARE @IP_KhoB      NVARCHAR(50)  = N'10.147.20.51';   -- <<< SỬA: IP ảo máy bạn thứ nhất
-DECLARE @IP_KhoC      NVARCHAR(50)  = N'10.147.20.77';   -- <<< SỬA: IP ảo máy bạn thứ hai
+DECLARE @IP_KhoA      NVARCHAR(50)  = N'10.91.229.18';   -- IP ảo máy nhóm trưởng (đã biết)
+DECLARE @IP_KhoB      NVARCHAR(50)  = N'10.91.___.___';  -- <<< SỬA: IP ảo máy bạn thứ nhất
+DECLARE @IP_KhoC      NVARCHAR(50)  = N'10.91.___.___';  -- <<< SỬA: IP ảo máy bạn thứ hai
 
 DECLARE @TenMay_KhoA  NVARCHAR(128) = N'MIGNON\KHO_A';        -- <<< SỬA nếu khác
 DECLARE @TenMay_KhoB  NVARCHAR(128) = N'LAPTOP-BAN1\KHO_B';   -- <<< SỬA
@@ -76,9 +77,9 @@ GO
 USE master;
 GO
 
-DECLARE @IP_KhoA NVARCHAR(50) = N'10.147.20.35';   -- <<< SỬA giống PHẦN 0
-DECLARE @IP_KhoB NVARCHAR(50) = N'10.147.20.51';   -- <<< SỬA
-DECLARE @IP_KhoC NVARCHAR(50) = N'10.147.20.77';   -- <<< SỬA
+DECLARE @IP_KhoA NVARCHAR(50) = N'10.91.229.18';   -- giống PHẦN 0
+DECLARE @IP_KhoB NVARCHAR(50) = N'10.91.___.___';  -- <<< SỬA giống PHẦN 0
+DECLARE @IP_KhoC NVARCHAR(50) = N'10.91.___.___';  -- <<< SỬA giống PHẦN 0
 DECLARE @TaiKhoan NVARCHAR(50) = N'sa', @MatKhau NVARCHAR(50) = N'123';
 
 DECLARE @KhoNay CHAR(5) = (SELECT TOP 1 MaKho FROM
@@ -178,7 +179,7 @@ GO
     1. Máy kia đã bật ZeroTier chưa, có online trên my.zerotier.com không
     2. Máy kia đã chạy BatTCPIP_VaFirewall.ps1 chưa (TCP/IP + firewall)
     3. Thử từ PowerShell máy này:
-           Test-NetConnection 10.147.20.51 -Port 1441
+           Test-NetConnection <IP ảo máy kia> -Port 1441
        PingSucceeded phải True và TcpTestSucceeded phải True
     4. Mật khẩu sa ở máy kia có đúng là '123' không
     5. Máy kia đã bật SQL Server Authentication chưa (không chỉ Windows Auth)
