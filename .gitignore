@@ -17,3 +17,7 @@ desktop.ini
 .vs/
 *.suo
 *.user
+
+# Ban sao database mang di - file nhi phan, tao lai duoc bang lenh BACKUP
+BanSaoMangDi/
+*.bak

@@ -631,7 +631,15 @@ BEGIN
            Thiếu chữ N thì SQL Server hiểu 'Kho Miền Bắc' là kiểu VARCHAR, dấu
            tiếng Việt bị rơi mất và kết quả in ra thành 'Kho Mi?n B?c'.
            Lỗi này đã gặp thật lúc chạy thử, ghi lại đây để không tái phạm.   */
-        IF @Server = @@SERVERNAME       -- site tại chỗ: KHÔNG đi vòng qua mạng
+        /* So sánh theo MÃ KHO chứ KHÔNG theo tên máy chủ.
+
+           Lý do: cột Kho.ServerName chứa TÊN LINKED SERVER, không nhất thiết
+           trùng với @@SERVERNAME của máy đang chạy. Khi hệ thống được đem đặt
+           lên ba máy vật lý khác nhau, mỗi máy có tên riêng (LAPTOP-A\KHO_B...)
+           trong khi tên Linked Server vẫn giữ nguyên để mọi script chạy được
+           mà không phải sửa. Nếu so theo @@SERVERNAME thì site tại chỗ sẽ bị
+           hiểu nhầm là site từ xa và câu lệnh sẽ hỏng.                        */
+        IF @MaKho = dbo.fn_MaKhoHienTai()   -- site tại chỗ: KHÔNG đi vòng qua mạng
             SET @SQL += N'SELECT N' + QUOTENAME(@TenKho, '''') + N' AS TenKho,
                                  MaKho, MaVT, SoLuong
                           FROM ' + QUOTENAME(@DB) + N'.dbo.TonKho';
