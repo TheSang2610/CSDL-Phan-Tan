@@ -18,7 +18,7 @@ function chuongIII() {
     no(2, 'Tạo một network riêng cho nhóm, thu được **Network ID** gồm 16 ký tự.'),
     no(3, 'Mỗi máy tham gia network bằng Network ID đó.'),
     no(4, 'Người quản trị network duyệt (Authorize) từng máy trên trang quản lý.'),
-    no(5, 'Mỗi máy được cấp một địa chỉ IP ảo thuộc dải **10.147.x.x**.'),
+    no(5, 'Mỗi máy được cấp một địa chỉ IP ảo riêng — network của nhóm được cấp dải **10.91.x.x**.'),
     p('Sau bước này, ba máy chủ có thể gọi nhau bằng địa chỉ IP ảo, bất kể chúng đang ở mạng vật lý nào.'),
 
     ...fig(A + '3.1_VPN_ZeroTier\\01_TaoNetwork_NetworkID.png',
@@ -26,7 +26,7 @@ function chuongIII() {
     ...fig(A + '3.1_VPN_ZeroTier\\02_ThanhVien_DaDuyet.png',
            'Danh sách thành viên của network. Mỗi máy chỉ vào được sau khi người quản trị tích ô Auth', 'III'),
     ...fig(A + '3.1_VPN_ZeroTier\\03_IPAo_TrenMay.png',
-           'Địa chỉ IP ảo thuộc dải 10.147.x.x mà ZeroTier cấp cho máy chủ', 'III'),
+           'Địa chỉ IP ảo mà ZeroTier cấp cho máy chủ, đối chiếu giữa trang quản lý network và lệnh ipconfig trên chính máy đó', 'III'),
     ...ghiChuAnh(A + '3.1_VPN_ZeroTier\\01_TaoNetwork_NetworkID.png'),
 
     // ================= 3.2 =================
@@ -45,6 +45,10 @@ function chuongIII() {
         ['S3', 'MIGNON\\KHO_C', '1442', 'Kho Miền Nam — Subscriber'],
       ], [8, 24, 14, 54]),
     p('Việc kiểm chứng đường truyền được thực hiện bằng khung nhìn hệ thống `sys.dm_exec_connections`. Khi kết nối theo tên thể hiện trong cùng một máy, cột `net_transport` cho giá trị **Shared memory**; khi kết nối qua địa chỉ IP ảo, cột này cho giá trị **TCP** kèm đúng địa chỉ ảo — đó là bằng chứng bằng số liệu rằng dữ liệu thật sự đi qua mạng.'),
+
+    p('Ba việc trên được gộp vào một tập lệnh PowerShell chạy một lần với quyền quản trị, nhờ đó lặp lại được y hệt trên máy của từng thành viên mà không sợ sót bước hay gõ nhầm cổng.'),
+    ...fig(A + '3.2_LinkMang\\00_KetQuaChayScript.png',
+           'Kết quả tập lệnh cấu hình mạng: ba cổng đã được lắng nghe, bảy dịch vụ đều ở trạng thái Running và Automatic', 'III', { width: 250 }),
 
     ...fig(A + '3.2_LinkMang\\01_TCPIP_Enabled.png',
            'Giao thức TCP/IP được bật cho thể hiện SQL Server trong SQL Server Configuration Manager', 'III'),
@@ -231,6 +235,7 @@ function chuongIII() {
     p('Sáu phép thử đều cho kết quả đúng như thiết kế. Đáng chú ý nhất là phép thử thứ hai: nhân viên kho **đọc được** bảng tồn kho nhưng **không ghi thẳng vào được**, buộc phải đi qua thủ tục — chính là cơ chế chuỗi sở hữu đã trình bày ở Chương II.'),
     ...fig(A + '3.7_KetQua_GiaoTac\\18_ThuTrigger.png', 'Thử trigger tại site KHO_A — cột LỚP CHẶN chỉ rõ hàng phòng thủ nào đã bắt được vi phạm', 'III'),
     p('Cùng một kịch bản này được chạy ở cả ba site và cho kết quả khác nhau đúng như thiết kế. Với phép thử cuối — sửa danh mục vật tư — tại **KHO_A** (Publisher) thì **được phép**, còn tại **KHO_B** và **KHO_C** (Subscriber) thì **bị trigger chặn** bằng lỗi 50000 kèm thông báo *"BẢNG NHÂN BẢN CHỈ ĐỌC"*. Đây là luật mà không một ràng buộc nào của SQL diễn tả nổi.'),
+    ...fig(A + '3.7_KetQua_GiaoTac\\18b_ThuTrigger_KhoB.png', 'Cùng kịch bản chạy tại site KHO_B. Bốn dòng đầu giống hệt, riêng dòng thứ năm đổi từ được phép sang bị chặn — bằng chứng cho thấy trigger phân biệt được vai trò Publisher và Subscriber', 'III'),
     p('Cột **LỚP CHẶN** được suy ra từ số hiệu lỗi, cho thấy chính xác hàng phòng thủ nào đã bắt được hành vi sai:'),
     tabCap('Kết quả thử năm hành vi vi phạm', 'III'),
     table(

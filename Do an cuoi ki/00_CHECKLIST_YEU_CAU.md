@@ -93,8 +93,8 @@
 
 | Mục | Nội dung | Ảnh cần | Trạng thái |
 |---|---|---|---|
-| 3.1 | **Cài đặt VPN** — ZeroTier | 4 ảnh | 🔄 có `HUONG_DAN_ZEROTIER_3MAY.md` — chờ bạn cài |
-| 3.2 | **Tạo đường link kết nối mạng giữa các server** | 7 ảnh | 🔄 có `BatTCPIP_VaFirewall.ps1` — chờ chạy Admin |
+| 3.1 | **Cài đặt VPN** — ZeroTier | 3 ảnh | ✅ network `a581878f...`, máy MAY_A_KHO_A đã Authorized, IP ảo 10.91.229.18 |
+| 3.2 | **Tạo đường link kết nối mạng giữa các server** | 5 ảnh | ✅ TCP/IP bật, cổng 1440-1442 cố định, firewall mở, net_transport = TCP |
 | 3.3 | **Cài đặt SQL Server** + print screen từng màn hình | ~16 ảnh | ✅ 18 ảnh (thư mục `ảnh` + `99_SSMS_3Instance`) |
 | 3.4 | **Kiểm tra dịch vụ Agent** | 1 ảnh | ✅ `01_ConfigurationManager_7Service.png` — 7/7 Running + Automatic |
 | 3.5 | **Tạo link CSDL giữa các Server** + print screen | 4 ảnh | ✅ đủ 4 ảnh |
@@ -135,9 +135,9 @@ Giao tác phân tán 2PC   █████████████████�
 Concurrency             ████████████████████  100%   08   C1/C2/C3/C4 ĐỀU ĐÚNG
 Distributed query       ████████████████████  100%   09   9 PHẦN, exit code 0
 Trigger + phân quyền    ████████████████████  100%   10   6 trigger + 4 vai trò, 3 site OK
-Chụp ảnh minh chứng     ████████████████░░░░   80%   34 ảnh — thiếu 3.1, 3.2, 3.4, diagram
-Viết báo cáo            ██████████████████░░   90%   BaoCao_DoAn_CSDLPhanTan.docx — 60 trang, 43 hình, 29 bảng
-                                              còn: điền tên nhóm + 5 thành viên, ảnh mục 3.1/3.2
+Chụp ảnh minh chứng     ████████████████████  100%   53 ảnh — đủ toàn bộ ảnh báo cáo gọi tới
+Viết báo cáo            ███████████████████░   97%   BaoCao_DoAn_CSDLPhanTan.docx — 65 trang, 53 hình, 29 bảng
+                                              còn: điền tên nhóm + 5 thành viên + tên giảng viên ở trang bìa
 ```
 
 ### Mốc đã đạt (cập nhật 12/09/2026)
