@@ -90,15 +90,33 @@ Lưu: `AnhChup\3.1_VPN_ZeroTier\03_Member_Da_Duyet.png`
 Đây là ảnh **quan trọng nhất** của mục 3.2 — chứng minh CSDL thật sự đi qua
 đường mạng ảo chứ không phải bộ nhớ chung.
 
+> ⚠️ **Mọi địa chỉ `10.147.x.x` trong tài liệu này chỉ là ví dụ.** Không có máy nào
+> mang sẵn địa chỉ đó. Gõ đại một địa chỉ ví dụ vào SSMS thì sẽ chờ khoảng 15 giây
+> rồi hiện `Error: 258 — The wait operation timed out`. Lỗi đó **không phải hỏng
+> cấu hình**, chỉ là đang gọi tới một máy không tồn tại.
+>
+> Lấy địa chỉ thật của máy mình bằng lệnh:
+> ```powershell
+> Get-NetIPAddress -AddressFamily IPv4 | Where-Object IPAddress -ne '127.0.0.1' |
+>     Select-Object InterfaceAlias, IPAddress
+> ```
+> Dòng nào có `InterfaceAlias` chứa chữ **ZeroTier** thì đó là IP ảo. Chưa thấy
+> dòng nào như vậy nghĩa là **chưa cài ZeroTier**, hãy quay lại bước A3.
+
+> 💡 **Chưa kịp cài ZeroTier vẫn chụp được ảnh này.** Bằng chứng cần có là
+> `net_transport = TCP` thay vì `Shared memory` — mà điều đó đúng với **mọi**
+> địa chỉ IP, không riêng IP ảo. Cứ dùng IP mạng nhà của máy (dòng `Ethernet`
+> hoặc `Wi-Fi`, dạng `192.168.x.x`) để chụp trước. Khi nào có ZeroTier thì chụp
+> lại bằng IP ảo, ảnh mới đè lên ảnh cũ.
+
 1. Mở **SSMS**
 2. Bấm **Connect** → **Database Engine**
-3. Ô **Server name** gõ IP ảo kèm cổng, ví dụ:
+3. Ô **Server name** gõ **IP thật của máy mình** kèm cổng, dấu **phẩy** chứ không
+   phải hai chấm:
 
    ```
-   10.147.20.35,1441
+   192.168.1.201,1440      <- ví dụ, thay bằng IP máy bạn
    ```
-
-   (thay `10.147.20.35` bằng IP ảo máy bạn ở bước A5)
 4. Authentication: **SQL Server Authentication**
    User: `sa`   Password: `123`
    ✅ tick **Trust Server Certificate**
@@ -119,11 +137,11 @@ FROM   sys.dm_exec_connections
 WHERE  session_id = @@SPID;
 ```
 
-Kết quả phải ra `net_transport = TCP` và `local_net_address` chính là IP ảo
-`10.147.x.x`. **Đó là bằng chứng bằng số liệu**, không phải chỉ nói miệng.
+Kết quả phải ra `net_transport = TCP` và `local_net_address` chính là địa chỉ bạn
+vừa gõ ở ô Server name. **Đó là bằng chứng bằng số liệu**, không phải chỉ nói miệng.
 
-📷 **Ảnh 3.2-3** — chụp cả ô Server name lẫn bảng kết quả
-Lưu: `AnhChup\3.2_LinkMang\03_KetNoi_Qua_VPN.png`
+📷 chụp cả ô Server name lẫn bảng kết quả
+Lưu: `AnhChup\3.2_LinkMang\04_NetTransport_TCP.png`
 
 > So sánh cho báo cáo: nếu nối theo `Mignon\KHO_B` như thường lệ thì
 > `net_transport` sẽ là **Shared memory**. Nối qua IP ảo thì là **TCP**.
