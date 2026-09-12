@@ -57,7 +57,8 @@ function chuongIII() {
     ...fig(A + '3.2_LinkMang\\03_TuongLua.png',
            'Các luật tường lửa mở cho ba cổng thể hiện, cổng UDP 1434 của SQL Server Browser và dịch vụ MS DTC', 'III'),
     ...fig(A + '3.2_LinkMang\\04_NetTransport_TCP.png',
-           'Kết nối qua địa chỉ IP ảo cho net_transport bằng TCP — dữ liệu thật sự đi qua mạng chứ không qua bộ nhớ chung', 'III'),
+           'Kết nối tới máy chủ bằng chính địa chỉ IP ảo mà ZeroTier đã cấp. Cột net_transport trả về TCP thay vì Shared memory, chứng tỏ dữ liệu thật sự đi qua mạng chứ không qua bộ nhớ chung trong máy', 'III'),
+    p('Trong ảnh trên, cửa sổ Object Explorer có bốn kết nối: ba kết nối theo tên thể hiện như thường lệ, và một kết nối thứ tư mở theo địa chỉ `10.91.229.18,1440` — chính là địa chỉ ảo đã thấy ở mục trước. Cột **MayChuDangKetNoi** vẫn trả về `Mignon\\KHO_A` vì `@@SERVERNAME` luôn cho tên đăng ký của máy chủ, không phụ thuộc vào cách người dùng kết nối tới; thứ thay đổi theo đường truyền là cột **DiaChi_MayChu**, và nó đang mang đúng địa chỉ ảo.'),
     ...ghiChuAnh(A + '3.2_LinkMang\\01_TCPIP_Enabled.png'),
 
     // ================= 3.3 =================
