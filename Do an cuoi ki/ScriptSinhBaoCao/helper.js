@@ -148,6 +148,20 @@ function fig(imgPath, caption, chuong, opt = {}) {
   ];
 }
 
+/* Ghi chú tạm cho mục chưa chụp được ảnh. Khi ảnh đã có trên đĩa thì câu ghi
+   chú tự biến mất, khỏi phải nhớ đi xoá bằng tay rồi để sót lại trong bản nộp. */
+function ghiChuAnh(imgPath) {
+  if (fs.existsSync(imgPath)) return [];
+  return [new Paragraph({
+    alignment: AlignmentType.JUSTIFIED,
+    spacing: { line: 360, after: 120 },
+    children: [new TextRun({
+      text: '(Ghi chú: phần ảnh chụp minh chứng cho mục này được bổ sung khi ba máy vật lý của nhóm cùng tham gia mạng ảo.)',
+      font: FONT, size: SIZE, italics: true,
+    })],
+  })];
+}
+
 function tabCap(caption, chuong) {
   tabCount[chuong] = (tabCount[chuong] || 0) + 1;
   const label = `Bảng ${chuong}.${tabCount[chuong]}: ${caption}`;
@@ -211,6 +225,6 @@ function blank(n = 1) {
 }
 
 module.exports = {
-  p, h1, h2, h3, li, no, code, fig, tabCap, table, pageBreak, blank, runs,
+  p, h1, h2, h3, li, no, code, fig, ghiChuAnh, tabCap, table, pageBreak, blank, runs,
   figList, tabList, anhThieu, FONT, SIZE, SIZE_SMALL,
 };

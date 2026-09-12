@@ -1,6 +1,6 @@
 // CHƯƠNG III và CHƯƠNG IV của cuốn báo cáo
 const H = require('./helper');
-const { p, h1, h2, h3, li, no, code, fig, tabCap, table, pageBreak } = H;
+const { p, h1, h2, h3, li, no, code, fig, ghiChuAnh, tabCap, table, pageBreak } = H;
 
 const A = 'D:\\CSDL PHAN TAN\\Do an cuoi ki\\AnhChup\\';
 const I = 'D:\\CSDL PHAN TAN\\ảnh\\';
@@ -20,7 +20,14 @@ function chuongIII() {
     no(4, 'Người quản trị network duyệt (Authorize) từng máy trên trang quản lý.'),
     no(5, 'Mỗi máy được cấp một địa chỉ IP ảo thuộc dải **10.147.x.x**.'),
     p('Sau bước này, ba máy chủ có thể gọi nhau bằng địa chỉ IP ảo, bất kể chúng đang ở mạng vật lý nào.'),
-    p('(Ghi chú: phần ảnh chụp minh chứng cho mục này được bổ sung khi ba máy vật lý của nhóm cùng tham gia mạng ảo.)', { italics: true }),
+
+    ...fig(A + '3.1_VPN_ZeroTier\\01_TaoNetwork_NetworkID.png',
+           'Network riêng của nhóm vừa được tạo, kèm Network ID mười sáu ký tự dùng để mời hai máy còn lại', 'III'),
+    ...fig(A + '3.1_VPN_ZeroTier\\02_ThanhVien_DaDuyet.png',
+           'Danh sách thành viên của network. Mỗi máy chỉ vào được sau khi người quản trị tích ô Auth', 'III'),
+    ...fig(A + '3.1_VPN_ZeroTier\\03_IPAo_TrenMay.png',
+           'Địa chỉ IP ảo thuộc dải 10.147.x.x mà ZeroTier cấp cho máy chủ', 'III'),
+    ...ghiChuAnh(A + '3.1_VPN_ZeroTier\\01_TaoNetwork_NetworkID.png'),
 
     // ================= 3.2 =================
     h2('2. Tạo đường liên kết mạng giữa các máy chủ'),
@@ -38,7 +45,16 @@ function chuongIII() {
         ['S3', 'MIGNON\\KHO_C', '1442', 'Kho Miền Nam — Subscriber'],
       ], [8, 24, 14, 54]),
     p('Việc kiểm chứng đường truyền được thực hiện bằng khung nhìn hệ thống `sys.dm_exec_connections`. Khi kết nối theo tên thể hiện trong cùng một máy, cột `net_transport` cho giá trị **Shared memory**; khi kết nối qua địa chỉ IP ảo, cột này cho giá trị **TCP** kèm đúng địa chỉ ảo — đó là bằng chứng bằng số liệu rằng dữ liệu thật sự đi qua mạng.'),
-    p('(Ghi chú: phần ảnh chụp minh chứng cho mục này được bổ sung khi ba máy vật lý của nhóm cùng tham gia mạng ảo.)', { italics: true }),
+
+    ...fig(A + '3.2_LinkMang\\01_TCPIP_Enabled.png',
+           'Giao thức TCP/IP được bật cho thể hiện SQL Server trong SQL Server Configuration Manager', 'III'),
+    ...fig(A + '3.2_LinkMang\\02_CongCoDinh.png',
+           'Gán cổng cố định tại mục IPAll, đồng thời xoá trắng ô cổng động', 'III'),
+    ...fig(A + '3.2_LinkMang\\03_TuongLua.png',
+           'Các luật tường lửa mở cho ba cổng thể hiện, cổng UDP 1434 của SQL Server Browser và dịch vụ MS DTC', 'III'),
+    ...fig(A + '3.2_LinkMang\\04_NetTransport_TCP.png',
+           'Kết nối qua địa chỉ IP ảo cho net_transport bằng TCP — dữ liệu thật sự đi qua mạng chứ không qua bộ nhớ chung', 'III'),
+    ...ghiChuAnh(A + '3.2_LinkMang\\01_TCPIP_Enabled.png'),
 
     // ================= 3.3 =================
     pageBreak(),
