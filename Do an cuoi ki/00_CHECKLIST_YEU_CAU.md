@@ -96,14 +96,14 @@
 | 3.1 | **Cài đặt VPN** — ZeroTier | 4 ảnh | 🔄 có `HUONG_DAN_ZEROTIER_3MAY.md` — chờ bạn cài |
 | 3.2 | **Tạo đường link kết nối mạng giữa các server** | 7 ảnh | 🔄 có `BatTCPIP_VaFirewall.ps1` — chờ chạy Admin |
 | 3.3 | **Cài đặt SQL Server** + print screen từng màn hình | ~16 ảnh | ✅ 18 ảnh (thư mục `ảnh` + `99_SSMS_3Instance`) |
-| 3.4 | **Kiểm tra dịch vụ Agent** | 2 ảnh | 🔄 đã xem qua: 7/7 service Running+Automatic — ⬜ chờ lưu ảnh vào thư mục |
+| 3.4 | **Kiểm tra dịch vụ Agent** | 1 ảnh | ✅ `01_ConfigurationManager_7Service.png` — 7/7 Running + Automatic |
 | 3.5 | **Tạo link CSDL giữa các Server** + print screen | 4 ảnh | ✅ đủ 4 ảnh |
 | 3.6 | **Tạo Publication** + print screen | 7 ảnh | ✅ 4 ảnh cốt lõi (đủ minh chứng) |
 | 3.7a | Thử giao tác — **Nhập dữ liệu** | 2 ảnh | ✅ script `04` đã chạy |
-| 3.7b | **Hiển thị dữ liệu** (kiểm tra đồng bộ / nhân bản / phân mảnh / linkserver) | 4 ảnh | ✅ script `09` PHẦN 2,5,6,7 — ⬜ chờ chụp |
-| 3.7c | **Thống kê** (kiểm tra đồng bộ / nhân bản / phân mảnh / linkserver) | 3 ảnh | ✅ script `09` PHẦN 3,4,8 — ⬜ chờ chụp |
-| 3.7d | **Viết trigger phân quyền bảo vệ các bảng** | 3 ảnh | ✅ script `10` — 6 trigger, 3 site — ⬜ chờ chụp |
-| 3.7e | Thử các transaction | 6 ảnh | ✅ **7 ảnh** T1/T2/T3 Results + Messages |
+| 3.7b | **Hiển thị dữ liệu** (kiểm tra đồng bộ / nhân bản / phân mảnh / linkserver) | 5 ảnh | ✅ ảnh `09, 12, 13, 14, 20` |
+| 3.7c | **Thống kê** (kiểm tra đồng bộ / nhân bản / phân mảnh / linkserver) | 3 ảnh | ✅ ảnh `10, 11, 15` |
+| 3.7d | **Viết trigger phân quyền bảo vệ các bảng** | 5 ảnh | ✅ ảnh `16, 17, 18, 18b, 19` |
+| 3.7e | Thử các transaction | 10 ảnh | ✅ T1/T2/T3 (ảnh `01–03b`) + tương tranh C1–C4 (`04–08`) |
 | Bonus | Phần mềm ứng dụng cho các trạm | — | ⬜ tùy thời gian |
 
 ---
