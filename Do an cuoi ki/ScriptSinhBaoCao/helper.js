@@ -22,14 +22,21 @@ function p(text, opt = {}) {
   });
 }
 
-// Cho phép đánh dấu **in đậm**, `tên kỹ thuật` và *in nghiêng* ngay trong chuỗi
+/* Cho phép đánh dấu **in đậm**, `tên kỹ thuật` và *in nghiêng* ngay trong chuỗi.
+
+   Theo yêu cầu định dạng của cuốn báo cáo, phần thân bài KHÔNG in đậm — chỉ tên
+   chương và tên mục mới in đậm. Nên các dấu ** trong nội dung được gỡ bỏ mà
+   không tô đậm chữ. Giữ nguyên cú pháp ** trong mã nguồn để sau này muốn bật
+   lại chỉ cần đổi hằng số dưới đây.                                            */
+const IN_DAM_THAN_BAI = false;
+
 function runs(text, opt = {}) {
   const out = [];
   const parts = String(text).split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*`]+\*)/g);
   for (const part of parts) {
     if (!part) continue;
     let t = part, bold = false, mono = false, ita = false;
-    if (part.startsWith('**') && part.endsWith('**')) { t = part.slice(2, -2); bold = true; }
+    if (part.startsWith('**') && part.endsWith('**')) { t = part.slice(2, -2); bold = IN_DAM_THAN_BAI; }
     else if (part.startsWith('`') && part.endsWith('`')) { t = part.slice(1, -1); mono = true; }
     else if (part.startsWith('*') && part.endsWith('*') && part.length > 2) { t = part.slice(1, -1); ita = true; }
     out.push(new TextRun({
@@ -109,10 +116,17 @@ function code(lines, opt = {}) {
 }
 
 // ---------- chú thích hình / bảng ----------
-let figCount = {};
-let tabCount = {};
+/* Hình và bảng đánh số liên tục từ 1 cho cả cuốn, không kèm số La Mã của
+   chương. "Hình 33" ngắn và dễ tra hơn "Hình III.33", nhất là khi danh sách
+   hình nằm ở đầu sách và người đọc phải lần ngược lại.
+   Tham số chương ở các lời gọi vẫn giữ để khỏi phải sửa hàng trăm chỗ.        */
+let figCount = 0;
+let tabCount = 0;
 const figList = [];
 const tabList = [];
+
+// Đánh dấu đoạn chú thích bảng, để lát nữa đẩy nó xuống dưới bảng
+const CHU_THICH_BANG = Symbol('chuThichBang');
 
 const anhThieu = [];
 function fig(imgPath, caption, chuong, opt = {}) {
@@ -126,8 +140,7 @@ function fig(imgPath, caption, chuong, opt = {}) {
   const w = Math.round(dim.w * scale);
   const h = Math.round(dim.h * scale);
 
-  figCount[chuong] = (figCount[chuong] || 0) + 1;
-  const label = `Hình ${chuong}.${figCount[chuong]}: ${caption}`;
+  const label = `Hình ${++figCount}: ${caption}`;
   figList.push(label);
 
   return [
@@ -163,14 +176,30 @@ function ghiChuAnh(imgPath) {
 }
 
 function tabCap(caption, chuong) {
-  tabCount[chuong] = (tabCount[chuong] || 0) + 1;
-  const label = `Bảng ${chuong}.${tabCount[chuong]}: ${caption}`;
+  const label = `Bảng ${++tabCount}: ${caption}`;
   tabList.push(label);
-  return new Paragraph({
+  // khoảng cách đặt theo vị trí cuối cùng: chú thích nằm DƯỚI bảng
+  const para = new Paragraph({
     alignment: AlignmentType.CENTER,
-    spacing: { before: 160, after: 60 },
+    spacing: { before: 60, after: 200 },
     children: [new TextRun({ text: label, font: FONT, size: 22, italics: true })],
   });
+  para[CHU_THICH_BANG] = true;
+  return para;
+}
+
+/* Trong mã nguồn, chú thích được viết TRƯỚC bảng cho dễ đọc. Quy cách trình bày
+   lại đòi tên bảng nằm DƯỚI bảng, nên đổi chỗ hai phần tử ngay trước khi dựng
+   tài liệu. Làm ở đây gọn hơn nhiều so với sửa tay 29 chỗ gọi.                 */
+function dayChuThichXuongDuoi(mang) {
+  const out = mang.slice();
+  for (let i = 0; i < out.length - 1; i++) {
+    if (out[i] && out[i][CHU_THICH_BANG] && out[i + 1] instanceof Table) {
+      const tam = out[i]; out[i] = out[i + 1]; out[i + 1] = tam;
+      i++;   // bỏ qua phần tử vừa đổi chỗ
+    }
+  }
+  return out;
 }
 
 // đọc kích thước PNG từ phần đầu tệp
@@ -226,5 +255,6 @@ function blank(n = 1) {
 
 module.exports = {
   p, h1, h2, h3, li, no, code, fig, ghiChuAnh, tabCap, table, pageBreak, blank, runs,
+  dayChuThichXuongDuoi,
   figList, tabList, anhThieu, FONT, SIZE, SIZE_SMALL,
 };

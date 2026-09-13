@@ -19,14 +19,14 @@ const TT = {
   detai: 'QUẢN LÝ KHO VẬT TƯ ĐA CHI NHÁNH',
   detaiPhu: 'HỆ CƠ SỞ DỮ LIỆU PHÂN TÁN TRÊN BA SITE',
   monhoc: 'Cơ sở dữ liệu phân tán',
-  giangvien: '[[ Điền tên giảng viên ]]',
-  nhom: '[[ Nhóm __ ]]',
+  giangvien: 'Phan Nghĩa Hiệp',
+  nhom: 'Nhóm 2',
   thanhvien: [
-    ['1.', '[[ Họ tên thành viên 01 ]]', '[[ MSSV ]]', 'Trưởng nhóm'],
-    ['2.', '[[ Họ tên thành viên 02 ]]', '[[ MSSV ]]', 'Thành viên'],
-    ['3.', '[[ Họ tên thành viên 03 ]]', '[[ MSSV ]]', 'Thành viên'],
-    ['4.', '[[ Họ tên thành viên 04 ]]', '[[ MSSV ]]', 'Thành viên'],
-    ['5.', '[[ Họ tên thành viên 05 ]]', '[[ MSSV ]]', 'Thành viên'],
+    ['1.', 'Nguyễn Thế Sang',   'N23DVCN050', 'Trưởng nhóm'],
+    ['2.', 'Nguyễn Thanh Sang', 'N23DVCN051', 'Thành viên'],
+    ['3.', 'Thái Thanh Vũ',     'N23DVCN064', 'Thành viên'],
+    ['4.', 'Hoàng Gia Bình',    'N23DVCN007', 'Thành viên'],
+    ['5.', 'Nguyễn Minh Khoa',  'N23DVCN030', 'Thành viên'],
   ],
   diadiem: 'TP.HCM, tháng 9 / 2026',
 };
@@ -110,11 +110,9 @@ function mucLuc() {
 
 // ------------------ DANH SÁCH HÌNH, BẢNG ------------------
 function danhSach() {
-  const out = [txt('DANH SÁCH HÌNH, BẢNG', { bold: true, size: 32, after: 240 })];
-  out.push(new Paragraph({
-    spacing: { before: 120, after: 120 },
-    children: [new TextRun({ text: 'DANH SÁCH HÌNH', font: FONT, size: 26, bold: true })],
-  }));
+  // dùng h1/h2 thay cho đoạn văn thường để hai mục này hiện ra trong mục lục
+  const out = [h1('DANH SÁCH HÌNH, BẢNG')];
+  out.push(h2('DANH SÁCH HÌNH'));
   for (const f of H.figList) {
     out.push(new Paragraph({
       spacing: { after: 40, line: 280 },
@@ -122,10 +120,7 @@ function danhSach() {
       children: [new TextRun({ text: f, font: FONT, size: 24 })],
     }));
   }
-  out.push(new Paragraph({
-    spacing: { before: 240, after: 120 },
-    children: [new TextRun({ text: 'DANH SÁCH BẢNG', font: FONT, size: 26, bold: true })],
-  }));
+  out.push(h2('DANH SÁCH BẢNG'));
   for (const t of H.tabList) {
     out.push(new Paragraph({
       spacing: { after: 40, line: 280 },
@@ -140,7 +135,7 @@ function danhSach() {
 // ---------------------------- TÓM TẮT ----------------------------
 function tomTat() {
   return [
-    txt('TÓM TẮT', { bold: true, size: 32, after: 300 }),
+    h1('TÓM TẮT'),
     p('Báo cáo trình bày quá trình phân tích, thiết kế và triển khai một **hệ cơ sở dữ liệu phân tán quản lý kho vật tư đa chi nhánh**, thực hiện trên ba site SQL Server độc lập.'),
     p('Xuất phát từ khảo sát tần suất truy cập cho thấy **89% nghiệp vụ hằng ngày chỉ đụng tới dữ liệu của chính kho đó**, nhóm quyết định **phân mảnh ngang** bảng tồn kho và chứng từ theo mã kho, đồng thời **nhân bản** ba bảng danh mục vì chúng có tỷ lệ đọc trên ghi rất cao. Bảng chi tiết chứng từ không chứa mã kho nên được **phân mảnh ngang dẫn xuất** bằng phép nửa nối theo phiếu.'),
     p('Hệ thống cài đặt đầy đủ các kỹ thuật cốt lõi của môn học: sáu **Linked Server** nối ba site thành đồ thị hai chiều; **Transactional Replication** đồng bộ danh mục với độ trễ đo được 15–20 giây; **giao tác phân tán hai pha** qua MS DTC cho nghiệp vụ điều chuyển vật tư; bốn kịch bản **điều khiển tương tranh**; và các **truy vấn phân tán** gộp dữ liệu từ cả ba máy chủ.'),
@@ -152,10 +147,11 @@ function tomTat() {
 
 // ---------------------------- DỰNG TÀI LIỆU ----------------------------
 // Chương I, II, III, IV phải dựng TRƯỚC để H.figList và H.tabList có dữ liệu
-const c1 = chuongI();
-const c2 = chuongII();
-const c3 = chuongIII();
-const c4 = chuongIV();
+// dayChuThichXuongDuoi: tên bảng viết trước bảng trong mã, nhưng phải in dưới bảng
+const c1 = H.dayChuThichXuongDuoi(chuongI());
+const c2 = H.dayChuThichXuongDuoi(chuongII());
+const c3 = H.dayChuThichXuongDuoi(chuongIII());
+const c4 = H.dayChuThichXuongDuoi(chuongIV());
 
 const taiLieu = [
   h1('TÀI LIỆU THAM KHẢO'),
