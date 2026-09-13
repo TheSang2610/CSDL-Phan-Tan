@@ -91,6 +91,23 @@ Toàn bộ nằm trong `Do an cuoi ki/SQL/`.
 | `Do an cuoi ki/HUONG_DAN_SSMS_VA_CHUP_ANH.md` | Kết nối SSMS và chụp ảnh minh chứng |
 | `Do an cuoi ki/AnhChup/` | Ảnh minh chứng theo từng mục báo cáo |
 
+### Triển khai lên ba máy vật lý
+
+| File | Dùng khi nào |
+|---|---|
+| `HUONG_DAN_TRIEN_KHAI_3_MAY_THAT.md` | **Đọc trước.** Kế hoạch hai giai đoạn: chuẩn bị ở nhà và ráp máy trên lớp |
+| `GUI_CHO_BAN_KHO_B.pdf` · `GUI_CHO_BAN_KHO_C.pdf` | Gửi cho hai bạn để họ cài SQL Server ở nhà. Mỗi bản đã điền sẵn tên instance và cổng riêng |
+| `HUONG_DAN_NGAY_DEMO.pdf` | **Cầm theo hôm demo.** Sổ tay 10 trang theo trình tự thời gian, kèm lời thoại khi trình bày |
+| `SQL/11_ChuyenSang3May.sql` | Đổi địa chỉ Linked Server sang IP ảo. Chỉ sửa 4 dòng, mười script kia giữ nguyên |
+| `HUONG_DAN_ZEROTIER_3MAY.md` | Chi tiết riêng phần mạng ảo và ảnh mục 3.1, 3.2 |
+
+### Đưa dữ liệu về trạng thái cũ
+
+| File | Mức độ |
+|---|---|
+| `SQL/07b_ResetDeChupLaiAnh.sql` | **Nhẹ.** Chỉ đặt lại dữ liệu demo điều chuyển. Chạy trước mỗi lần chụp lại ảnh mục 3.7 |
+| `SQL/00_ResetToanBo.sql` | **Nặng.** Gỡ nhân bản để `DROP DATABASE` chạy được, rồi dựng lại từ script 01 |
+
 ---
 
 ## ⚙️ Yêu cầu môi trường
