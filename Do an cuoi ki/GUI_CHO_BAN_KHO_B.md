@@ -22,6 +22,18 @@ Trong cả file này mọi chỗ cần `KHO_B` và `1441` đều **đã điền 
 > tên instance phải là `KHO_B`, mật khẩu `sa` phải là `123`, và phải tích
 > **SQL Server Replication** lúc chọn tính năng.
 
+## Về những chỗ có dấu 📷
+
+Ảnh minh chứng cho cuốn báo cáo **nhóm trưởng đã chụp đủ rồi**, bạn không phải
+chụp để nộp. Những chỗ đánh dấu 📷 dưới đây là **chụp gửi nhóm trưởng kiểm tra
+giùm** — để bạn ấy soát xem bạn có đặt đúng tên instance, đúng mật khẩu, có bật
+đúng dịch vụ hay không.
+
+Phát hiện sai ở nhà thì sửa kịp. Để hôm lên lớp mới lòi ra thì không cứu được,
+vì cài lại SQL Server mất hơn một tiếng.
+
+Ngại chụp thì thôi cũng được, nhưng **bước 8 thì bắt buộc phải gửi**.
+
 ## Bạn KHÔNG cần chuẩn bị gì thêm
 
 Không phải tải mã nguồn, không cần tài khoản GitHub, không cần file database.
@@ -171,7 +183,7 @@ phần quan trọng nhất của đồ án. Không mở thì demo chính không 
 
 5. Bấm **OK** → nó hỏi khởi động lại dịch vụ → **Yes**
 
-📷 **CHỤP MÀN HÌNH TAB SECURITY NÀY** — dùng cho báo cáo.
+📷 **Chụp tab Security này** gửi nhóm trưởng — đây là chỗ hay tick thiếu nhất.
 
 ---
 
@@ -202,7 +214,7 @@ ipconfig | Select-String -Context 0,4 "ZeroTier"
 
 ---
 
-## BƯỚC 8 — Báo lại cho nhóm trưởng
+## BƯỚC 8 — Báo lại cho nhóm trưởng ⭐ BẮT BUỘC
 
 Mở **SSMS** → Connect vào `.\KHO_B` (có dấu chấm và gạch chéo ngược) →
 **New Query** → dán và chạy:
@@ -218,7 +230,7 @@ Gửi nhóm trưởng **ba thứ** — thiếu là hôm lên lớp phải ngồi
 ```
 1. Ten may chu     (cot TenMayChu, vi du  LAPTOP-ABC\KHO_B)
 2. IP ao ZeroTier  (dang 10.91.x.x, lay o buoc 7)
-3. Anh chup cac buoc co dau may anh o tren
+3. Anh chup cac buoc o tren (neu co, de nhom truong soat giup)
 ```
 
 ---
