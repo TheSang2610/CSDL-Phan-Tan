@@ -323,6 +323,46 @@ function chuongIII() {
         ['C4', 'Deadlock hai chiều', 'Tổng 500 — **ĐÚNG**', 'SQL Server tự gỡ bằng Msg 1205'],
       ], [6, 26, 22, 46]),
     p('**Lựa chọn của nhóm:** dùng **khoá bi quan** cho các thao tác trong cùng một site, vì thao tác kho rất ngắn, tranh chấp ít, và khoá bi quan cho kết quả đúng tuyệt đối mà không bắt người dùng nhập lại phiếu. Cột phiên bản vẫn được giữ trong bảng tồn kho để dành cho tầng ứng dụng web sau này, nơi một màn hình có thể mở hàng phút trước khi bấm Lưu — lúc đó khoá bi quan sẽ chặn cả hệ thống quá lâu.'),
+
+    // ================= 3.8 =================
+    pageBreak(),
+    h2('8. Phần mềm ứng dụng cho các trạm'),
+    p('Đề cương nêu thêm một mục không bắt buộc: *viết phần mềm ứng dụng cho các trạm theo thiết kế nếu có thể*. Nhóm đã thực hiện mục này.'),
+    p('Mỗi kho chạy **một bản** phần mềm trên máy của mình, nối vào cơ sở dữ liệu của chính kho đó. Kiến trúc đúng theo mô hình ba tầng đã trình bày ở Chương II:'),
+    ...code([
+      '   Trình duyệt            Node.js + Express           SQL Server site này',
+      '  (TẦNG TRÌNH BÀY) --HTTP--> (TẦNG NGHIỆP VỤ) --TDS--> (TẦNG DỮ LIỆU)',
+      '                                                              |',
+      '                                          Linked Server ------+---> hai site kia',
+    ]),
+    p('**Một nguyên tắc quan trọng trong cách cài đặt:** mọi thao tác ghi của phần mềm đều **gọi các thủ tục đã có sẵn** trong cơ sở dữ liệu, không viết câu lệnh thêm hay sửa trực tiếp lên bảng. Đây không phải sở thích lập trình mà là điều kiện bắt buộc — thủ tục mới là nơi đặt giao tác, khoá và kiểm tra tồn kho. Nếu ứng dụng ghi thẳng vào bảng thì toàn bộ ba lớp bảo vệ ở mục trước bị đi vòng, và bản thân vai trò NhanVienKho cũng không có quyền ghi thẳng.'),
+
+    tabCap('Bảy màn hình và nghiệp vụ tương ứng', 'III'),
+    table(
+      ['Màn hình', 'Nghiệp vụ đề bài yêu cầu', 'Thủ tục được gọi'],
+      [
+        ['Tổng quan', 'Xem mảnh dữ liệu của kho này, cảnh báo thiếu hàng', 'sp_CanhBaoTonToiThieu'],
+        ['Tồn kho toàn hệ thống', 'Kiểm tra tồn kho toàn hệ thống', 'sp_TonKhoToanHeThong_Site'],
+        ['Nhập kho', 'Nhập vật tư tại Kho A', 'sp_NhapKho'],
+        ['Xuất kho', 'Xuất vật tư tại Kho B', 'sp_XuatKho'],
+        ['Điều chuyển', 'Điều chuyển vật tư giữa hai kho', 'sp_DieuChuyenVatTu'],
+        ['Danh mục', 'Đồng bộ danh mục vật tư', 'đọc bảng nhân bản tại chỗ'],
+        ['Lịch sử', 'Theo dõi chứng từ của trạm', 'sp_LichSuChungTu'],
+      ], [20, 46, 34]),
+
+    ...fig(A + '3.8_UngDungTram\\01_TongQuan_KhoA.png',
+           'Màn hình chính của trạm Kho Trung tâm. Thanh đầu trang cho biết đang nối máy chủ nào, qua giao thức nào', 'III'),
+    p('Thanh đầu trang hiển thị **giao thức kết nối** đọc từ `sys.dm_exec_connections`. Giá trị `TCP : 1440` cho thấy phần mềm nối tới cơ sở dữ liệu qua mạng chứ không qua bộ nhớ chung — cùng một bằng chứng đã dùng ở mục 2, lần này hiện ngay trên giao diện người dùng.'),
+
+    ...fig(A + '3.8_UngDungTram\\02_TonKhoToanHeThong.png',
+           'Tồn kho gộp từ ba site hiện trong một bảng duy nhất, dòng nền xanh là dữ liệu của chính trạm đang đứng', 'III'),
+    p('Người dùng không hề biết dòng nào nằm ở máy nào, cũng không cần biết. Đó chính là **trong suốt phân mảnh** nhìn từ phía người sử dụng cuối, thứ mà các mục trước mới chỉ chứng minh bằng câu lệnh.'),
+    p('Thủ tục `sp_TonKhoToanHeThong_Site` được viết riêng cho phần mềm này. Bản ở mục 7.2 đọc danh sách kho bằng tên cơ sở dữ liệu ghi cứng nên chỉ chạy được tại Kho Trung tâm; bản mới đọc **bảng Kho cục bộ** — vốn là bảng nhân bản nên site nào cũng có một bản giống hệt — nhờ đó chạy được ở mọi trạm. Đây là một lợi ích thực tế nữa của việc nhân bản danh mục.'),
+
+    ...fig(A + '3.8_UngDungTram\\03_DieuChuyen_LoiGiuaChung.png',
+           'Màn hình điều chuyển sau khi bấm nút mô phỏng lỗi giữa chừng. Bảng trước và bảng sau giống hệt nhau', 'III'),
+    p('Màn hình điều chuyển có **hai nút**. Nút xanh chạy giao tác phân tán bình thường. Nút đỏ bật cờ `@GayLoiThuNghiem`, khiến giao tác hỏng ngay sau khi kho nguồn đã bị trừ nhưng trước khi kho đích được cộng.'),
+    p('Cả hai nút đều tự chụp tồn kho ba site **trước** và **sau** rồi bày hai bảng cạnh nhau. Với nút đỏ, hai bảng giống hệt nhau — `570 / 250 / 310` cả trước lẫn sau. Đây là cách trả lời trực quan nhất cho yêu cầu *nếu giao dịch thất bại giữa chừng thì dữ liệu phải được xử lý nhất quán*: người xem nhìn hai bảng là hiểu, không cần đọc một dòng SQL nào.'),
   ];
 }
 
@@ -374,10 +414,10 @@ function chuongIV() {
     li('Nhân bản danh mục là **một chiều**, nên khi Kho Trung tâm gặp sự cố thì không site nào sửa được danh mục.'),
     li('Distributor đặt chung máy với Publisher, chưa tách riêng như hệ thống thật.'),
     li('Chưa có cơ chế tự động thử lại giao tác khi gặp deadlock — hiện tại việc này để cho tầng ứng dụng.'),
-    li('Chưa xây dựng phần mềm ứng dụng cho các trạm; hiện thao tác qua công cụ quản trị.'),
+    li('Phần mềm trạm mới dừng ở mức đủ dùng cho nghiệp vụ kho: chưa có đăng nhập người dùng, chưa phân quyền ngay trên giao diện mà còn dựa hoàn toàn vào bốn vai trò ở tầng cơ sở dữ liệu.'),
 
     h2('4. Hướng phát triển'),
-    no(1, 'Xây dựng phần mềm ứng dụng cho máy trạm theo đúng mô hình front-end đã thiết kế, dùng cột phiên bản để điều khiển tương tranh lạc quan.'),
+    no(1, 'Bổ sung đăng nhập cho phần mềm trạm và ánh xạ người dùng sang đúng một trong bốn vai trò, thay vì dùng chung một tài khoản như hiện nay. Khi đó cột phiên bản trong bảng tồn kho sẽ phát huy tác dụng cho điều khiển tương tranh lạc quan, vì một màn hình có thể mở hàng phút trước khi người dùng bấm Lưu.'),
     no(2, 'Tách Distributor ra máy riêng để giảm tải cho Publisher.'),
     no(3, 'Bổ sung cơ chế tự động thử lại khi gặp lỗi 1205.'),
     no(4, 'Mở rộng sang mô hình nhiều kho hơn — thiết kế hiện tại đã sẵn sàng, vì thêm kho mới chỉ cần thêm một dòng vào bảng Kho.'),
