@@ -22,7 +22,10 @@ function bỏEmoji(s) {
   return String(s)
     .replace(/⚠️?\s*/g, 'LƯU Ý: ')
     .replace(/💡\s*/g, 'MẸO: ')
-    .replace(/📷\s*/g, '» ');
+    .replace(/📷\s*/g, '» ')
+    .replace(/⭐\s*/g, '')
+    .replace(/✔/g, 'OK')
+    .replace(/✘/g, 'X');
 }
 
 /* --- chữ in đậm / `mã` / *nghiêng* ngay trong dòng --- */
@@ -48,6 +51,29 @@ function runs(text, opt = {}) {
     }));
   }
   return out.length ? out : [new TextRun({ text: ' ', font: FONT, size: SIZE })];
+}
+
+/* Dòng có cú pháp riêng thì không được gộp vào đoạn văn phía trên. */
+function laDongDacBiet(l) {
+  return !l.trim()
+      || /^\s*```/.test(l)
+      || /^\s*\|/.test(l)
+      || /^\s*---+\s*$/.test(l)
+      || /^#{1,4}\s+/.test(l)
+      || /^\s*>/.test(l)
+      || /^\s*-\s+\[[ xX]\]\s+/.test(l)
+      || /^\s*\d+\.\s+/.test(l)
+      || /^\s*[-*]\s+/.test(l);
+}
+
+/* Gộp các dòng liền nhau thành một đoạn, đúng như markdown vẫn làm.
+   Không gộp thì một cụm **in đậm** viết vắt qua hai dòng sẽ bị đứt đôi,
+   hai dấu sao lọt ra ngoài và in nguyên si lên giấy. */
+function gomDoan(dong, tuVitri) {
+  const cum = [];
+  let i = tuVitri;
+  while (i < dong.length && !laDongDacBiet(dong[i])) { cum.push(dong[i].trim()); i++; }
+  return { text: cum.join(' '), ketThuc: i };
 }
 
 function docTuMarkdown(mdPath) {
@@ -135,13 +161,24 @@ function docTuMarkdown(mdPath) {
     if (/^\s*>/.test(l)) {
       const than = [];
       while (i < dong.length && /^\s*>/.test(dong[i])) {
-        than.push(dong[i].replace(/^\s*>\s?/, '')); i++;
+        than.push(dong[i].replace(/^\s*>\s?/, '').trim()); i++;
       }
-      than.forEach(c => kq.push(new Paragraph({
-        spacing: { line: 300, after: 60 },
+      // gộp các dòng liền nhau thành một đoạn, dòng "> " trống thì ngắt đoạn
+      const doan = [];
+      let tam = [];
+      for (const c of than) {
+        if (!c) { if (tam.length) { doan.push(tam.join(' ')); tam = []; } }
+        else tam.push(c);
+      }
+      if (tam.length) doan.push(tam.join(' '));
+
+      doan.forEach(c => kq.push(new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { line: 300, after: 100 },
         indent: { left: convertInchesToTwip(0.25) },
         border: { left: { style: BorderStyle.SINGLE, size: 12, color: 'F0A500', space: 8 } },
-        children: runs(c, { italics: true }),
+        // cả khối đã in nghiêng rồi, nên bỏ cặp * bọc ngoài kẻo nó in ra nguyên si
+        children: runs(c.replace(/^\*(?!\*)/, '').replace(/(^|[^*])\*$/, '$1'), { italics: true }),
       })));
       kq.push(new Paragraph({ spacing: { after: 100 }, children: [new TextRun('')] }));
       continue;
@@ -192,12 +229,15 @@ function docTuMarkdown(mdPath) {
     }
 
     // ---- đoạn văn thường ----
-    kq.push(new Paragraph({
-      alignment: AlignmentType.JUSTIFIED,
-      spacing: { line: 300, after: 80 },
-      children: runs(l.trim()),
-    }));
-    i++;
+    {
+      const { text, ketThuc } = gomDoan(dong, i);
+      kq.push(new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { line: 300, after: 80 },
+        children: runs(text),
+      }));
+      i = ketThuc > i ? ketThuc : i + 1;
+    }
   }
   return kq;
 }
