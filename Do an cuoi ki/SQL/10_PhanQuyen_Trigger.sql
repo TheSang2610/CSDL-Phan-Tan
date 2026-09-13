@@ -474,13 +474,15 @@ GO
 
    Dòng kiểm tra ngay dưới đây sẽ báo cho bạn biết nếu chọn sai.
    ############################################################################ */
-IF DB_NAME() NOT IN ('KhoA','KhoB','KhoC')
+/* RAISERROR chỉ nhận biến hoặc hằng làm tham số thay thế, không nhận lời gọi hàm. */
+DECLARE @db SYSNAME = DB_NAME();
+IF @db NOT IN ('KhoA','KhoB','KhoC')
 BEGIN
     RAISERROR (N'>>> ĐANG Ở SAI DATABASE (%s). Hãy chọn KhoA / KhoB / KhoC ở ô dropdown trên thanh công cụ SSMS rồi chạy lại. <<<',
-               16, 1, DB_NAME());
+               16, 1, @db);
 END
 ELSE
-    PRINT N'✔ Database hiện tại: ' + DB_NAME() + N'  -> chạy tiếp được';
+    PRINT N'✔ Database hiện tại: ' + @db + N'  -> chạy tiếp được';
 GO
 
 

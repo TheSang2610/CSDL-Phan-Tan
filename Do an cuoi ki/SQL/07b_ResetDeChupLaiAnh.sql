@@ -27,9 +27,15 @@
 USE KhoA;
 GO
 
-IF DB_NAME() <> 'KhoA'
+/* RAISERROR chỉ nhận biến hoặc hằng làm tham số thay thế, không nhận lời gọi hàm.
+   Đặt DB_NAME() thẳng vào đó sẽ báo lỗi biên dịch 102 và cả khối này bị bỏ qua,
+   tức là câu chặn mất tác dụng đúng lúc cần nó nhất.                              */
+DECLARE @db SYSNAME = DB_NAME();
+IF @db <> 'KhoA'
     RAISERROR (N'>>> ĐANG Ở SAI DATABASE (%s). Chọn KhoA ở ô dropdown SSMS rồi chạy lại. <<<',
-               16, 1, DB_NAME());
+               16, 1, @db);
+ELSE
+    PRINT N'Database hiện tại: ' + @db + N'  -> chạy tiếp được';
 GO
 
 PRINT N'--- TRƯỚC KHI RESET ---';
