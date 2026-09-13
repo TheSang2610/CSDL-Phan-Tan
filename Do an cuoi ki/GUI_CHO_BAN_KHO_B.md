@@ -1,21 +1,32 @@
-# GỬI BẠN LÀM **KHO B** — CÀI TRƯỚC Ở NHÀ
+# KHO B — CÀI TRƯỚC Ở NHÀ
 
-> Bạn nhận file này sẽ làm **máy KHO B** (Kho Miền Bắc, Bắc Ninh) trong đồ án CSDL phân tán của nhóm.
-> Hôm lên lớp ba máy nối với nhau là chạy được ngay — nhưng phải **cài sẵn ở nhà**,
-> vì riêng việc tải SQL Server đã mất gần một tiếng.
+> Bạn nhận file này sẽ làm **máy KHO B** (Kho Miền Bắc, Bắc Ninh) trong đồ án CSDL phân tán
+> của nhóm. Hôm lên lớp ba máy nối với nhau là chạy được ngay — nhưng **phải cài
+> xong ở nhà trước**, vì riêng việc tải SQL Server đã mất gần một tiếng.
 >
-> Làm theo đúng thứ tự. Chỗ nào kẹt thì chụp màn hình gửi lại.
+> Làm theo đúng thứ tự. Chỗ nào kẹt thì chụp màn hình gửi lại cho nhóm trưởng.
 
-**Ba con số của riêng bạn — nhớ kỹ, đừng dùng số của bạn kia:**
+## Bốn thông số của riêng bạn
 
-| Mục | Giá trị của bạn |
+| Mục | Giá trị |
 |---|---|
 | Tên instance phải đặt | **`KHO_B`** |
 | Cổng TCP | **`1441`** |
-| Database sẽ dùng | **`KhoB`** |
+| Mật khẩu tài khoản `sa` | **`123`** |
+| Network ID ZeroTier | **`a581878f7d00676e`** |
 
-Trong cả file này, mọi chỗ cần `KHO_B` và `1441` đều đã **điền sẵn đúng cho bạn** —
-cứ chép nguyên, không phải sửa gì.
+Trong cả file này mọi chỗ cần `KHO_B` và `1441` đều **đã điền sẵn đúng cho bạn**
+— chép nguyên, không phải sửa gì.
+
+> **Ba điều tuyệt đối không được đổi**, vì các script của nhóm gọi đích danh:
+> tên instance phải là `KHO_B`, mật khẩu `sa` phải là `123`, và phải tích
+> **SQL Server Replication** lúc chọn tính năng.
+
+## Bạn KHÔNG cần chuẩn bị gì thêm
+
+Không phải tải mã nguồn, không cần tài khoản GitHub, không cần file database.
+**Nhóm trưởng mang theo hết hôm lên lớp.** Việc của bạn ở nhà chỉ là cài phần mềm
+và mở đường mạng.
 
 ---
 
@@ -44,7 +55,7 @@ Trình **SQL Server Installation Center** mở ra:
 2. **Edition**: chọn **Developer** → Next
 3. **License Terms**: tick **I accept** → Next
 4. **Microsoft Update**: bỏ trống → Next
-5. **Install Rules**: nếu có cảnh báo vàng về **Firewall** thì kệ nó, Next
+5. **Install Rules**: có cảnh báo vàng về **Firewall** thì kệ nó, Next
 6. **Feature Selection**: tick đúng **ba mục** sau
 
    ```
@@ -62,10 +73,10 @@ Trình **SQL Server Installation Center** mở ra:
    ```
    → Next
 
-8. **Server Configuration** — quan trọng, đừng bỏ qua
+8. **Server Configuration**
 
    Tìm dòng **SQL Server Agent**, đổi cột **Startup Type** từ `Manual` thành
-   **`Automatic`**.
+   **`Automatic`**. Thiếu bước này thì phần nhân bản của đồ án không chạy.
 
    📷 **CHỤP MÀN HÌNH NÀY** → Next
 
@@ -99,12 +110,14 @@ Trình **SQL Server Installation Center** mở ra:
 
 ## BƯỚC 5 — Mở đường mạng cho máy khác vào được
 
-Máy bạn vừa cài xong thì **chỉ mình nó nói chuyện với nó**. Phải mở cổng TCP.
+Máy vừa cài xong thì **chỉ mình nó nói chuyện với nó**. Phải mở cổng TCP.
 
 1. Bấm **Start** → gõ `powershell`
 2. Ở kết quả **Windows PowerShell**, bấm **chuột phải** → **Run as administrator**
 3. Windows hỏi *"Do you want to allow..."* → **Yes**
-4. Dán nguyên khối dưới đây vào rồi Enter — **đã điền sẵn đúng cho bạn**
+4. Cửa sổ mở ra phải có chữ **Administrator** trên thanh tiêu đề. Không có chữ đó
+   thì làm lại — chạy thiếu quyền sẽ báo đỏ `Requested registry access is not allowed`.
+5. Dán nguyên khối dưới đây vào rồi Enter — **đã điền sẵn đúng cho bạn**
 
 ```powershell
 $Ten = 'KHO_B'; $Cong = 1441
@@ -130,17 +143,16 @@ Get-Service "MSSQL`$$Ten","SQLAgent`$$Ten",SQLBrowser,MSDTC | Format-Table Name,
 
 📷 **Chụp kết quả** — bốn dòng phải đều `Running`.
 
-> Nếu dòng `Set-ItemProperty` báo đỏ *"Cannot find path ... MSSQL16.KHO_B"* thì
-> nghĩa là **tên instance bạn đặt không phải `KHO_B`**. Mở
-> **SQL Server Configuration Manager** xem tên thật rồi cài lại cho đúng —
-> các script của nhóm gọi đích danh tên này nên không được đặt khác.
+> Báo đỏ *"Cannot find path ... MSSQL16.KHO_B"* nghĩa là **tên instance bạn đặt
+> không phải `KHO_B`**. Mở **SQL Server Configuration Manager** xem tên thật. Sai
+> tên thì phải gỡ ra cài lại cho đúng, vì script của nhóm gọi đích danh tên này.
 
 ---
 
 ## BƯỚC 6 — Mở MS DTC cho mạng
 
-Đây là thứ cho phép **chuyển hàng giữa hai kho mà không mất hàng giữa chừng**.
-Không mở thì phần quan trọng nhất của đồ án chạy không được.
+Đây là thứ cho phép **chuyển hàng giữa hai kho mà không mất hàng giữa chừng** —
+phần quan trọng nhất của đồ án. Không mở thì demo chính không chạy được.
 
 1. Bấm **Windows + R** → gõ `dcomcnfg` → **OK**
 2. Bên trái bung lần lượt:
@@ -165,38 +177,61 @@ Không mở thì phần quan trọng nhất của đồ án chạy không đư�
 
 ## BƯỚC 7 — Cài ZeroTier và vào mạng của nhóm
 
-1. Vào `https://www.zerotier.com/download/` → tải bản **Windows** → cài (bấm Next hết)
-2. Nhìn góc dưới phải màn hình (khay đồng hồ), tìm icon **ZeroTier** màu cam
+1. Vào `https://www.zerotier.com/download/` → tải bản **Windows** → cài (Next hết)
+2. Nhìn khay đồng hồ góc dưới phải, tìm icon **ZeroTier** màu cam
    (không thấy thì bấm mũi tên `^` để bung ra)
 3. **Chuột phải** vào icon đó → **Join New Network...**
-4. Dán **Network ID** mà nhóm trưởng gửi → bấm **Join**
-5. Nhắn cho nhóm trưởng: *"mình join rồi, duyệt giúp"*
-   (bạn ấy phải tick ô **Auth?** trên trang quản lý thì bạn mới vào được)
-6. Chờ khoảng 10 giây, chuột phải icon ZeroTier → **Show Networks**
-   → thấy dòng network có **Managed IP** dạng `10.147.x.x`
+4. Dán Network ID rồi bấm **Join**:
 
-📷 **Chụp lại và gửi IP này cho nhóm trưởng.**
+   ```
+   a581878f7d00676e
+   ```
+
+5. Nhắn cho nhóm trưởng: *"mình join rồi, duyệt giúp"*
+   Bạn ấy phải tích ô **Auth?** trên trang quản lý thì bạn mới vào được mạng.
+6. Chờ khoảng 10 giây, chuột phải icon ZeroTier → **Show Networks**
+   → dòng network phải ghi **OK** và có **Managed IP** dạng `10.91.x.x`
+
+Lấy địa chỉ ảo bằng lệnh này cho chắc:
+
+```powershell
+ipconfig | Select-String -Context 0,4 "ZeroTier"
+```
+
+📷 **Chụp lại màn hình này.**
 
 ---
 
-## BƯỚC 8 — Gửi lại ba thông tin
+## BƯỚC 8 — Báo lại cho nhóm trưởng
 
-Mở **SSMS** → Connect vào `.\KHO_B` (có dấu chấm và dấu gạch chéo ngược) →
-bấm **New Query** → dán và chạy:
+Mở **SSMS** → Connect vào `.\KHO_B` (có dấu chấm và gạch chéo ngược) →
+**New Query** → dán và chạy:
 
 ```sql
-SELECT @@SERVERNAME                                  AS TenMayChu,
+SELECT @@SERVERNAME                                        AS TenMayChu,
        CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(60)) AS TenMayTinh,
        CAST(SERVERPROPERTY('Edition')     AS NVARCHAR(60)) AS PhienBan;
 ```
 
-Chụp kết quả gửi nhóm trưởng, kèm:
+Gửi nhóm trưởng **ba thứ** — thiếu là hôm lên lớp phải ngồi hỏi lại, mất thời gian:
 
 ```
 1. Ten may chu     (cot TenMayChu, vi du  LAPTOP-ABC\KHO_B)
-2. IP ao ZeroTier  (vi du  10.147.20.51)
-3. Anh chup cac buoc o tren
+2. IP ao ZeroTier  (dang 10.91.x.x, lay o buoc 7)
+3. Anh chup cac buoc co dau may anh o tren
 ```
+
+---
+
+## NHỮNG LỖI HAY GẶP
+
+| Hiện tượng | Nguyên nhân | Cách sửa |
+|---|---|---|
+| `Cannot find path ... MSSQL16.KHO_B` | Đặt sai tên instance | Xem tên thật trong Configuration Manager, sai thì cài lại |
+| `Requested registry access is not allowed` | PowerShell chạy thiếu quyền | Đóng đi, mở lại bằng **Run as administrator** |
+| `Login failed for user 'sa'` | Quên chọn Mixed Mode, hoặc mật khẩu khác `123` | Chạy `ALTER LOGIN sa ENABLE; ALTER LOGIN sa WITH PASSWORD='123';` |
+| ZeroTier báo `ACCESS DENIED` | Nhóm trưởng chưa tích ô `Auth?` | Nhắn nhóm trưởng duyệt |
+| Không thấy icon ZeroTier | Bị ẩn trong khay | Bấm mũi tên `^` cạnh đồng hồ |
 
 ---
 
@@ -208,23 +243,30 @@ Chụp kết quả gửi nhóm trưởng, kèm:
 - [ ] SQL Server Agent để **Automatic**
 - [ ] **Mixed Mode**, mật khẩu `sa` là **`123`**
 - [ ] Cài SSMS
-- [ ] Chạy khối PowerShell mở cổng **1441** (bước 5)
-- [ ] Mở **MS DTC** cho mạng (bước 6)
-- [ ] Cài ZeroTier, join network, báo nhóm trưởng duyệt
+- [ ] Chạy khối PowerShell mở cổng **1441** với quyền administrator
+- [ ] Mở **MS DTC** cho mạng
+- [ ] Cài ZeroTier, join `a581878f7d00676e`, báo nhóm trưởng duyệt
 - [ ] Gửi lại **tên máy chủ** + **IP ảo** + ảnh chụp
 
 > Tổng thời gian khoảng **1,5 tiếng**, phần lớn là ngồi chờ tải và cài.
-> Làm xong ở nhà thì hôm lên lớp chỉ mất 30 phút là cả nhóm demo được.
+> Làm xong ở nhà thì hôm lên lớp cả nhóm chỉ mất 30 phút là demo được.
 
 ---
 
-### Hôm lên lớp bạn sẽ làm gì (xem trước cho đỡ bỡ ngỡ)
+## HÔM LÊN LỚP BẠN SẼ LÀM GÌ
 
-Nhóm trưởng đưa bạn file `KhoB.bak` và thư mục `SQL\`. Bạn chỉ cần:
+Xem trước cho đỡ bỡ ngỡ. Nhóm trưởng đưa bạn file `KhoB.bak` và thư mục `SQL\`
+ngay tại chỗ, bạn chỉ cần:
 
 1. **Restore** `KhoB.bak` vào instance `KHO_B` của bạn
    (chuột phải **Databases** → **Restore Database** → **Device** → chọn file)
-2. Chạy `SQL\11_ChuyenSang3May.sql` — file này khai báo địa chỉ hai máy còn lại
-3. Ngồi xem demo điều chuyển hàng giữa Kho A và kho của bạn
+2. Mở `SQL\11_ChuyenSang3May.sql` mà nhóm trưởng đã điền sẵn thông số → bấm F5
+3. Chạy một câu để chứng minh máy bạn nhìn được toàn hệ thống:
 
-Không phải gõ thêm gì.
+   ```sql
+   SELECT * FROM dbo.v_TonKho_ToanHeThong;
+   ```
+
+4. Ngồi xem demo điều chuyển hàng giữa Kho A và kho của bạn
+
+Không phải gõ thêm gì. Tổng cộng khoảng 15 phút.
