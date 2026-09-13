@@ -25,3 +25,6 @@ BanSaoMangDi/
 # Bai tap giua ky - nop o cho khac, khong de trong kho nay
 BT01_Nhom02/
 BT02_Nhom02/
+
+# Thu vien npm cua phan mem tram - cai lai bang lenh npm install
+node_modules/

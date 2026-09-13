@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phần mềm trạm — Quản lý kho vật tư</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%93%A6%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header id="dinh">
+  <div class="vach">
+    <div>
+      <div class="nhan">TRẠM ĐANG LÀM VIỆC</div>
+      <h1 id="tenKho">Đang nối cơ sở dữ liệu…</h1>
+      <div class="phu" id="diaChi"></div>
+    </div>
+    <div class="thongso" id="thongSo"></div>
+  </div>
+</header>
+
+<nav id="thanhTab">
+  <button class="tab hoatdong" data-muc="tongquan">Tổng quan</button>
+  <button class="tab" data-muc="toanhethong">Tồn kho toàn hệ thống</button>
+  <button class="tab" data-muc="nhap">Nhập kho</button>
+  <button class="tab" data-muc="xuat">Xuất kho</button>
+  <button class="tab" data-muc="dieuchuyen">Điều chuyển</button>
+  <button class="tab" data-muc="danhmuc">Danh mục</button>
+  <button class="tab" data-muc="lichsu">Lịch sử</button>
+</nav>
+
+<main>
+
+  <!-- ================= TỔNG QUAN ================= -->
+  <section id="tongquan" class="muc hien">
+    <h2>Tồn kho tại trạm này</h2>
+    <p class="dan">Đây là <b>mảnh dữ liệu</b> của riêng kho này. Ràng buộc kiểm tra
+       ở tầng cơ sở dữ liệu không cho phép một dòng của kho khác lọt vào đây.</p>
+    <div id="canhBao"></div>
+    <div id="bangTonKho"></div>
+  </section>
+
+  <!-- ================= TOÀN HỆ THỐNG ================= -->
+  <section id="toanhethong" class="muc">
+    <h2>Tồn kho toàn hệ thống</h2>
+    <p class="dan">Dữ liệu gộp từ <b>cả ba site</b>. Site tại chỗ đọc thẳng, hai site
+       kia đi qua Linked Server. Người dùng nhìn thấy một bảng duy nhất mà không cần
+       biết dữ liệu nằm ở máy nào — đó là <b>trong suốt phân mảnh</b>.</p>
+    <button class="nut" onclick="taiToanHeThong()">Tải lại</button>
+    <div id="bangToanHeThong"></div>
+  </section>
+
+  <!-- ================= NHẬP KHO ================= -->
+  <section id="nhap" class="muc">
+    <h2>Nhập kho</h2>
+    <p class="dan">Phiếu nhập được ghi vào mảnh của <b>chính kho này</b>, tồn kho tự
+       cộng thêm. Toàn bộ nằm trong một giao tác cục bộ.</p>
+    <form id="formNhap" class="the">
+      <div class="hang">
+        <label>Nhà cung cấp
+          <select id="nhapNCC" required></select>
+        </label>
+        <label>Người lập phiếu
+          <input id="nhapNguoiLap" value="Nhân viên kho" required>
+        </label>
+      </div>
+      <div id="dongNhap"></div>
+      <button type="button" class="nut phu-nut" onclick="themDong('dongNhap', true)">+ Thêm dòng</button>
+      <button type="submit" class="nut chinh">Ghi phiếu nhập</button>
+    </form>
+    <div id="kqNhap"></div>
+  </section>
+
+  <!-- ================= XUẤT KHO ================= -->
+  <section id="xuat" class="muc">
+    <h2>Xuất kho</h2>
+    <p class="dan">Thủ tục kiểm tra tồn kho trước khi trừ. Xuất quá số đang có sẽ bị
+       <b>từ chối và quay lui</b>, không để tồn kho âm.</p>
+    <form id="formXuat" class="the">
+      <div class="hang">
+        <label>Người nhận
+          <input id="xuatNguoiNhan" value="Công trình Nguyễn Văn Cừ" required>
+        </label>
+        <label>Người lập phiếu
+          <input id="xuatNguoiLap" value="Nhân viên kho" required>
+        </label>
+      </div>
+      <div id="dongXuat"></div>
+      <button type="button" class="nut phu-nut" onclick="themDong('dongXuat', false)">+ Thêm dòng</button>
+      <button type="submit" class="nut chinh">Ghi phiếu xuất</button>
+    </form>
+    <div id="kqXuat"></div>
+  </section>
+
+  <!-- ================= ĐIỀU CHUYỂN ================= -->
+  <section id="dieuchuyen" class="muc">
+    <h2>Điều chuyển vật tư sang kho khác</h2>
+    <p class="dan">Nghiệp vụ <b>đụng tới hai cơ sở dữ liệu trên hai máy chủ</b>. Thủ tục
+       mở giao tác phân tán, MS DTC làm trọng tài hai pha: chỉ khi cả hai site đều
+       báo sẵn sàng thì dữ liệu mới được ghi thật.</p>
+
+    <form id="formChuyen" class="the">
+      <div class="hang">
+        <label>Kho đích
+          <select id="chuyenKho" required></select>
+        </label>
+        <label>Vật tư
+          <select id="chuyenVT" required></select>
+        </label>
+        <label>Số lượng
+          <input id="chuyenSL" type="number" min="1" value="50" required>
+        </label>
+      </div>
+      <label>Lý do điều chuyển
+        <input id="chuyenGhiChu" value="Bổ sung do dưới mức tồn tối thiểu">
+      </label>
+
+      <div class="hang nut-hang">
+        <button type="submit" class="nut chinh">Điều chuyển</button>
+        <button type="button" class="nut nguy" onclick="chuyenLoi()">
+          Mô phỏng lỗi giữa chừng
+        </button>
+      </div>
+      <p class="ghichu">Nút màu đỏ cố tình cho giao tác hỏng <b>sau khi kho nguồn đã bị
+         trừ</b> nhưng trước khi kho đích được cộng. Dùng để chứng minh dữ liệu vẫn
+         nhất quán khi sự cố xảy ra giữa chừng.</p>
+    </form>
+
+    <div id="kqChuyen"></div>
+    <div id="soSanh"></div>
+  </section>
+
+  <!-- ================= DANH MỤC ================= -->
+  <section id="danhmuc" class="muc">
+    <h2>Danh mục vật tư</h2>
+    <p class="dan" id="danDanhMuc"></p>
+    <div id="bangVatTu"></div>
+    <h2 style="margin-top:28px">Nhà cung cấp</h2>
+    <div id="bangNCC"></div>
+  </section>
+
+  <!-- ================= LỊCH SỬ ================= -->
+  <section id="lichsu" class="muc">
+    <h2>Chứng từ gần đây tại trạm này</h2>
+    <button class="nut" onclick="taiLichSu()">Tải lại</button>
+    <div id="bangLichSu"></div>
+  </section>
+
+</main>
+
+<footer>
+  Đồ án môn học Cơ sở dữ liệu phân tán — Quản lý kho vật tư đa chi nhánh · Nhóm 2
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
