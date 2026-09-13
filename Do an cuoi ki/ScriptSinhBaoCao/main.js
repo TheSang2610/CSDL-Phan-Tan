@@ -109,25 +109,45 @@ function mucLuc() {
 }
 
 // ------------------ DANH SÁCH HÌNH, BẢNG ------------------
+/* Chú thích đặt dưới hình cần đầy đủ, vì người đọc đang nhìn vào hình và cần
+   biết nó chứng minh điều gì. Nhưng cũng chính những câu đó xếp thành danh sách
+   ở đầu sách thì dài lê thê, mỗi mục chiếm hai ba dòng, tra cứu rất mệt.
+   Ở đây rút mỗi mục còn một dòng: cắt tại dấu chấm hoặc gạch ngang đầu tiên —
+   phần trước đó luôn là mệnh đề nêu đúng nội dung, phần sau là lời giải thích. */
+function rutGon(nhan, toiDa = 78) {
+  const i = nhan.indexOf(': ');
+  let so = nhan.slice(0, i + 2), noi = nhan.slice(i + 2);
+
+  // cắt tại dấu ngắt ý đầu tiên nằm sau chữ thứ 12, để nhãn không cụt lủn
+  const cat = [noi.indexOf('. '), noi.indexOf(' — '), noi.indexOf(' - '), noi.indexOf(': ')]
+              .filter(x => x > 12);
+  if (cat.length) noi = noi.slice(0, Math.min(...cat));
+
+  // vẫn dài thì cắt tiếp tại dấu phẩy, cùng lắm mới cắt giữa câu
+  if (noi.length > toiDa) {
+    const phay = noi.lastIndexOf(', ', toiDa);
+    if (phay > 12) noi = noi.slice(0, phay);
+  }
+  if (noi.length > toiDa) {
+    const k = noi.lastIndexOf(' ', toiDa);
+    noi = noi.slice(0, k > 12 ? k : toiDa);
+  }
+  return so + noi.replace(/[,;:\s]+$/, '');
+}
+
 function danhSach() {
   // dùng h1/h2 thay cho đoạn văn thường để hai mục này hiện ra trong mục lục
+  const dong = t => new Paragraph({
+    spacing: { after: 0, line: 250 },
+    indent: { left: convertInchesToTwip(0.25), hanging: convertInchesToTwip(0.05) },
+    children: [new TextRun({ text: rutGon(t), font: FONT, size: 22 })],
+  });
+
   const out = [h1('DANH SÁCH HÌNH, BẢNG')];
   out.push(h2('DANH SÁCH HÌNH'));
-  for (const f of H.figList) {
-    out.push(new Paragraph({
-      spacing: { after: 40, line: 280 },
-      indent: { left: convertInchesToTwip(0.2) },
-      children: [new TextRun({ text: f, font: FONT, size: 24 })],
-    }));
-  }
+  for (const f of H.figList) out.push(dong(f));
   out.push(h2('DANH SÁCH BẢNG'));
-  for (const t of H.tabList) {
-    out.push(new Paragraph({
-      spacing: { after: 40, line: 280 },
-      indent: { left: convertInchesToTwip(0.2) },
-      children: [new TextRun({ text: t, font: FONT, size: 24 })],
-    }));
-  }
+  for (const t of H.tabList) out.push(dong(t));
   out.push(pageBreak());
   return out;
 }
@@ -259,7 +279,10 @@ const doc = new Document({
   ],
 });
 
-const OUT = 'D:\\CSDL PHAN TAN\\Do an cuoi ki\\BaoCao_DoAn_CSDLPhanTan.docx';
+/* Đặt biến môi trường BAOCAO_OUT để dựng ra một file khác — dùng khi bản chính
+   đang mở trong Word, lúc đó Windows khoá file lại và ghi đè sẽ báo EBUSY.    */
+const OUT = process.env.BAOCAO_OUT
+         || 'D:\\CSDL PHAN TAN\\Do an cuoi ki\\BaoCao_DoAn_CSDLPhanTan.docx';
 Packer.toBuffer(doc).then(buf => {
   fs.writeFileSync(OUT, buf);
   console.log('Da tao: ' + OUT);
