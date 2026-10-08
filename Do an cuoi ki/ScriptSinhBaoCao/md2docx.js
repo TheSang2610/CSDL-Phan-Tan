@@ -256,7 +256,7 @@ async function main() {
         headers: { default: new Header({ children: [new Paragraph({
           alignment: AlignmentType.RIGHT,
           border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: 'CCCCCC' } },
-          children: [new TextRun({ text: 'Đồ án CSDL phân tán — Hướng dẫn cài đặt', font: FONT, size: 18, italics: true, color: '666666' })],
+          children: [new TextRun({ text: process.env.DAUTRANG || 'Đồ án CSDL phân tán — Hướng dẫn cài đặt', font: FONT, size: 18, italics: true, color: '666666' })],
         })] }) },
         footers: { default: new Footer({ children: [new Paragraph({
           alignment: AlignmentType.CENTER,
