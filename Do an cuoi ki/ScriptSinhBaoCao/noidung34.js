@@ -59,6 +59,10 @@ function chuongIII() {
     ...fig(A + '3.2_LinkMang\\04_NetTransport_TCP.png',
            'Kết nối tới máy chủ bằng chính địa chỉ IP ảo mà ZeroTier đã cấp. Cột net_transport trả về TCP thay vì Shared memory, chứng tỏ dữ liệu thật sự đi qua mạng chứ không qua bộ nhớ chung trong máy', 'III'),
     p('Trong ảnh trên, cửa sổ Object Explorer có bốn kết nối: ba kết nối theo tên thể hiện như thường lệ, và một kết nối thứ tư mở theo địa chỉ `10.91.229.18,1440` — chính là địa chỉ ảo đã thấy ở mục trước. Cột **MayChuDangKetNoi** vẫn trả về `Mignon\\KHO_A` vì `@@SERVERNAME` luôn cho tên đăng ký của máy chủ, không phụ thuộc vào cách người dùng kết nối tới; thứ thay đổi theo đường truyền là cột **DiaChi_MayChu**, và nó đang mang đúng địa chỉ ảo.'),
+    p('Một phép kiểm chứng mạnh hơn được thực hiện sau khi ba site đã chuyển hẳn sang ba máy vật lý. Hàm `@@SERVERNAME` đặt trong truy vấn con qua Linked Server vẫn được tính **tại máy gọi**, nên không dùng để phân biệt được các site; phải dùng `OPENQUERY` để gửi nguyên chuỗi lệnh sang máy đích và cho hàm chạy ở bên đó.'),
+    ...fig(A + '3.2_LinkMang\\05_BaMayVatLy_OPENQUERY.png',
+           'Truy vấn qua OPENQUERY trả về ba tên máy tính khác nhau Mignon, Admin-PC và GiaBinh, xác nhận ba site chạy trên ba máy vật lý riêng biệt', 'III'),
+    p('Cột **MayTinhThat** là bằng chứng quan trọng nhất: ba giá trị `Mignon`, `Admin-PC`, `GiaBinh` là tên ba máy tính khác nhau của ba thành viên, nối nhau qua mạng riêng ảo. Cột **Instance** cho thấy tên đăng ký thật của từng máy chủ, khác hẳn tên gọi mà các tập lệnh vẫn dùng — đúng tinh thần **trong suốt vị trí**: đổi địa chỉ thật mà không phải sửa một dòng lệnh nào.'),
     ...ghiChuAnh(A + '3.2_LinkMang\\01_TCPIP_Enabled.png'),
 
     // ================= 3.3 =================
@@ -362,7 +366,18 @@ function chuongIII() {
     ...fig(A + '3.8_UngDungTram\\03_DieuChuyen_LoiGiuaChung.png',
            'Màn hình điều chuyển sau khi bấm nút mô phỏng lỗi giữa chừng. Bảng trước và bảng sau giống hệt nhau', 'III'),
     p('Màn hình điều chuyển có **hai nút**. Nút xanh chạy giao tác phân tán bình thường. Nút đỏ bật cờ `@GayLoiThuNghiem`, khiến giao tác hỏng ngay sau khi kho nguồn đã bị trừ nhưng trước khi kho đích được cộng.'),
-    p('Cả hai nút đều tự chụp tồn kho ba site **trước** và **sau** rồi bày hai bảng cạnh nhau. Với nút đỏ, hai bảng giống hệt nhau — `570 / 250 / 310` cả trước lẫn sau. Đây là cách trả lời trực quan nhất cho yêu cầu *nếu giao dịch thất bại giữa chừng thì dữ liệu phải được xử lý nhất quán*: người xem nhìn hai bảng là hiểu, không cần đọc một dòng SQL nào.'),
+    p('Cả hai nút đều tự chụp tồn kho ba site **trước** và **sau** rồi bày hai bảng cạnh nhau. Với nút đỏ, hai bảng giống hệt nhau — `750 / 200 / 420` cả trước lẫn sau. Đây là cách trả lời trực quan nhất cho yêu cầu *nếu giao dịch thất bại giữa chừng thì dữ liệu phải được xử lý nhất quán*: người xem nhìn hai bảng là hiểu, không cần đọc một dòng SQL nào.'),
+
+    p('Hai ảnh dưới đây được chụp lại sau khi hệ thống đã chuyển hẳn sang **ba máy vật lý** nối nhau qua mạng riêng ảo, thay cho ba thể hiện trên cùng một máy. Mọi con số trong ảnh đều là kết quả chạy thật qua đường truyền.'),
+    ...fig(A + '3.8_UngDungTram\\04_TonKhoToanHeThong_3MayThat.png',
+           'Tồn kho toàn hệ thống đọc từ ba máy vật lý: 24 dòng gồm 10 dòng tại chỗ và 14 dòng lấy qua Linked Server, cột Tình trạng tự đánh dấu những mặt hàng dưới mức tồn tối thiểu', 'III'),
+    p('Bảng này từng không chạy được khi mới chuyển sang ba máy. Mỗi máy cài SQL Server với **bộ đối chiếu (collation) mặc định riêng**: máy Kho Trung tâm dùng `Vietnamese_CI_AS`, hai máy còn lại dùng `SQL_Latin1_General_CP1_CI_AS`. Phép `UNION ALL` giữa hai bộ đối chiếu khác nhau bị từ chối với lỗi 457. Cách sửa là ép các cột chữ về `COLLATE DATABASE_DEFAULT` trước khi gộp. Đây là lỗi **chỉ xuất hiện trên hệ phân tán thật**, vì ba thể hiện trên cùng một máy luôn dùng chung một bộ đối chiếu.'),
+    ...fig(A + '3.8_UngDungTram\\05_DieuChuyen_ThanhCong_3MayThat.png',
+           'Điều chuyển 50 sản phẩm từ Kho Trung tâm sang Kho Miền Bắc giữa hai máy vật lý: tồn kho đi từ 800 xuống 750 ở kho nguồn và từ 150 lên 200 ở kho đích', 'III'),
+    p('Tổng số hàng toàn hệ thống không đổi: rời kho nguồn bao nhiêu thì tới kho đích bấy nhiêu. Đây là bất biến mà giao tác phân tán phải giữ, và cũng là thứ dễ kiểm chứng nhất khi trình bày.'),
+    ...fig(A + '3.8_UngDungTram\\06_DieuChuyen_LoiGiuaChung_3MayThat.png',
+           'Mô phỏng lỗi giữa chừng trên ba máy thật: hai bảng trước và sau giống hệt nhau, 750 / 200 / 420, không một đơn vị hàng nào bị mất', 'III'),
+    p('Điểm đáng chú ý là lỗi này xảy ra khi hai nửa của giao tác nằm trên **hai máy tính khác nhau**, nên việc quay lui không thể do một máy tự làm. MS DTC đóng vai trọng tài: chỉ khi cả hai máy cùng báo sẵn sàng thì dữ liệu mới được ghi thật; một bên hỏng là cả hai bên cùng quay lại trạng thái cũ.'),
   ];
 }
 

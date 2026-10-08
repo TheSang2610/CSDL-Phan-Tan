@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    ĐỒ ÁN CUỐI KỲ - CSDL PHÂN TÁN - QUẢN LÝ KHO VẬT TƯ ĐA CHI NHÁNH
    ----------------------------------------------------------------------------
    FILE 10 : PHÂN QUYỀN VÀ TRIGGER BẢO VỆ CÁC BẢNG
@@ -234,6 +234,13 @@ NOT FOR REPLICATION
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    /* Lenh DELETE / UPDATE khong khop dong nao van kich hoat trigger. Khi do
+       ca inserted lan deleted deu rong, NoiDung thanh NULL va cau INSERT ben
+       duoi vo vi cot NoiDung NOT NULL. Thoat som cho an toan.            */
+    IF NOT EXISTS (SELECT 1 FROM inserted) AND NOT EXISTS (SELECT 1 FROM deleted)
+        RETURN;
+
     DECLARE @Kho CHAR(5) = dbo.fn_MaKhoHienTai();
 
     IF @Kho <> 'KHO_A'          -- KHO_B và KHO_C chỉ giữ bản sao

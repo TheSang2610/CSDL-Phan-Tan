@@ -104,7 +104,7 @@
 | 3.7c | **Thống kê** (kiểm tra đồng bộ / nhân bản / phân mảnh / linkserver) | 3 ảnh | ✅ ảnh `10, 11, 15` |
 | 3.7d | **Viết trigger phân quyền bảo vệ các bảng** | 5 ảnh | ✅ ảnh `16, 17, 18, 18b, 19` |
 | 3.7e | Thử các transaction | 10 ảnh | ✅ T1/T2/T3 (ảnh `01–03b`) + tương tranh C1–C4 (`04–08`) |
-| Bonus | Phần mềm ứng dụng cho các trạm | — | ⬜ tùy thời gian |
+| Bonus | Phần mềm ứng dụng cho các trạm | 6 ảnh | ✅ `UngDungWeb/` — 7 màn hình, đã chạy trên **ba máy vật lý**, báo cáo mục 3.8 |
 
 ---
 

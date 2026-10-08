@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    ĐỒ ÁN CUỐI KỲ - CSDL PHÂN TÁN - QUẢN LÝ KHO VẬT TƯ ĐA CHI NHÁNH
    ----------------------------------------------------------------------------
    FILE 12 : THỦ TỤC PHỤC VỤ PHẦN MỀM ỨNG DỤNG CHO CÁC TRẠM
@@ -73,12 +73,16 @@ BEGIN
         /* Tiền tố N bắt buộc: thiếu nó thì 'Kho Miền Bắc' bị hiểu là VARCHAR,
            dấu tiếng Việt rơi mất và in ra thành 'Kho Mi?n B?c'.               */
         IF @MaKho = @MaKhoNay          -- site tại chỗ: đọc thẳng, không qua mạng
-            SET @SQL += N'SELECT N' + QUOTENAME(@TenKho, '''') + N' AS TenKho,
-                                 MaKho, MaVT, SoLuong, NgayCapNhat
+            SET @SQL += N'SELECT N' + QUOTENAME(@TenKho, '''') + N' COLLATE DATABASE_DEFAULT AS TenKho,
+                                 MaKho COLLATE DATABASE_DEFAULT AS MaKho,
+                                 MaVT  COLLATE DATABASE_DEFAULT AS MaVT,
+                                 SoLuong, NgayCapNhat
                           FROM dbo.TonKho';
         ELSE                           -- site từ xa: đi qua Linked Server
-            SET @SQL += N'SELECT N' + QUOTENAME(@TenKho, '''') + N' AS TenKho,
-                                 MaKho, MaVT, SoLuong, NgayCapNhat
+            SET @SQL += N'SELECT N' + QUOTENAME(@TenKho, '''') + N' COLLATE DATABASE_DEFAULT AS TenKho,
+                                 MaKho COLLATE DATABASE_DEFAULT AS MaKho,
+                                 MaVT  COLLATE DATABASE_DEFAULT AS MaVT,
+                                 SoLuong, NgayCapNhat
                           FROM ' + QUOTENAME(@Server) + N'.' + QUOTENAME(@DB)
                        + N'.dbo.TonKho';
 
@@ -89,6 +93,10 @@ BEGIN
     END
     CLOSE cur; DEALLOCATE cur;
 
+        /* COLLATE DATABASE_DEFAULT la BAT BUOC khi ba site nam tren ba may:
+           moi may cai SQL Server voi collation mac dinh rieng, UNION ALL giua
+           hai collation khac nhau se bao loi 457. Ep ve collation cua CSDL
+           tai cho thi cau gop luon chay duoc. */
     /* Ghép thêm tên vật tư từ danh mục CỤC BỘ - cũng là bảng nhân bản, nên
        phép nối chạy tại chỗ, không tốn thêm vòng nào qua mạng.               */
     SET @SQL = N'

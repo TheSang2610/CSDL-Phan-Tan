@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    ĐỒ ÁN CUỐI KỲ - CSDL PHÂN TÁN - QUẢN LÝ KHO VẬT TƯ ĐA CHI NHÁNH
    ----------------------------------------------------------------------------
    FILE 06 : TẠO PUBLICATION - ĐỒNG BỘ DANH MỤC VẬT TƯ   (mục 3.6 của báo cáo)
@@ -149,8 +149,8 @@ BEGIN
              @subscriber = @MayChuCu, @destination_db = N'KhoB';
     END TRY BEGIN CATCH END CATCH
 
-    DECLARE @SubB SYSNAME = @MayChuCu + N'\KHO_B';
-    DECLARE @SubC SYSNAME = @MayChuCu + N'\KHO_C';
+    DECLARE @SubB SYSNAME = N'Admin-PC\KHO_B';   -- tên máy chủ THẬT của Kho B
+    DECLARE @SubC SYSNAME = N'GiaBinh\KHO_C';    -- tên máy chủ THẬT của Kho C
 
     BEGIN TRY
         EXEC sp_dropsubscription @publication = N'PUB_DanhMuc', @article = N'all',
@@ -260,9 +260,9 @@ GO
 DECLARE @MayChu SYSNAME = CAST(SERVERPROPERTY('MachineName') AS SYSNAME);
 DECLARE @Sub SYSNAME, @SubDb SYSNAME;
 DECLARE cur CURSOR FOR
-    SELECT @MayChu + N'\KHO_B', N'KhoB'
+    SELECT N'Admin-PC\KHO_B', N'KhoB'
     UNION ALL
-    SELECT @MayChu + N'\KHO_C', N'KhoC';
+    SELECT N'GiaBinh\KHO_C', N'KhoC';
 OPEN cur;
 FETCH NEXT FROM cur INTO @Sub, @SubDb;
 

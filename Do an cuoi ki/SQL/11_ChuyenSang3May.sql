@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    ĐỒ ÁN CUỐI KỲ - CSDL PHÂN TÁN - QUẢN LÝ KHO VẬT TƯ ĐA CHI NHÁNH
    ----------------------------------------------------------------------------
    FILE 11 : CHUYỂN HỆ THỐNG TỪ 1 MÁY SANG 3 MÁY VẬT LÝ
@@ -44,12 +44,12 @@
    ############################################################################ */
 
 DECLARE @IP_KhoA      NVARCHAR(50)  = N'10.91.229.18';   -- IP ảo máy nhóm trưởng (đã biết)
-DECLARE @IP_KhoB      NVARCHAR(50)  = N'10.91.___.___';  -- <<< SỬA: IP ảo máy bạn thứ nhất
-DECLARE @IP_KhoC      NVARCHAR(50)  = N'10.91.___.___';  -- <<< SỬA: IP ảo máy bạn thứ hai
+DECLARE @IP_KhoB      NVARCHAR(50)  = N'10.91.229.252';  -- <<< SỬA: IP ảo máy bạn thứ nhất
+DECLARE @IP_KhoC      NVARCHAR(50)  = N'10.91.229.121';  -- <<< SỬA: IP ảo máy bạn thứ hai
 
 DECLARE @TenMay_KhoA  NVARCHAR(128) = N'MIGNON\KHO_A';        -- <<< SỬA nếu khác
-DECLARE @TenMay_KhoB  NVARCHAR(128) = N'LAPTOP-BAN1\KHO_B';   -- <<< SỬA
-DECLARE @TenMay_KhoC  NVARCHAR(128) = N'LAPTOP-BAN2\KHO_C';   -- <<< SỬA
+DECLARE @TenMay_KhoB  NVARCHAR(128) = N'Admin-PC\KHO_B';      -- đã lấy thật qua ZeroTier
+DECLARE @TenMay_KhoC  NVARCHAR(128) = N'GiaBinh\KHO_C';       -- đã lấy thật qua ZeroTier
 
 /* Cổng cố định do script BatTCPIP_VaFirewall.ps1 gán - giữ nguyên */
 DECLARE @Cong_KhoA INT = 1440, @Cong_KhoB INT = 1441, @Cong_KhoC INT = 1442;
@@ -78,12 +78,12 @@ USE master;
 GO
 
 DECLARE @IP_KhoA NVARCHAR(50) = N'10.91.229.18';   -- giống PHẦN 0
-DECLARE @IP_KhoB NVARCHAR(50) = N'10.91.___.___';  -- <<< SỬA giống PHẦN 0
-DECLARE @IP_KhoC NVARCHAR(50) = N'10.91.___.___';  -- <<< SỬA giống PHẦN 0
+DECLARE @IP_KhoB NVARCHAR(50) = N'10.91.229.252';  -- <<< SỬA giống PHẦN 0
+DECLARE @IP_KhoC NVARCHAR(50) = N'10.91.229.121';  -- <<< SỬA giống PHẦN 0
 DECLARE @TaiKhoan NVARCHAR(50) = N'sa', @MatKhau NVARCHAR(50) = N'123';
 
 DECLARE @KhoNay CHAR(5) = (SELECT TOP 1 MaKho FROM
-                           (SELECT 'KHO_' + UPPER(RIGHT(DB_NAME(),1)) AS MaKho) x);
+                           (SELECT 'KHO_' + UPPER(RIGHT(@@SERVERNAME,1)) AS MaKho) x);
 
 /* Bảng mô tả ba site: tên gọi Linked Server (giữ nguyên) + địa chỉ mới */
 DECLARE @Site TABLE (MaKho CHAR(5), TenLink NVARCHAR(128), DiaChi NVARCHAR(80));
@@ -95,7 +95,7 @@ INSERT INTO @Site VALUES
 DECLARE @Ma CHAR(5), @Link NVARCHAR(128), @Dia NVARCHAR(80);
 DECLARE cur CURSOR FOR
     SELECT MaKho, TenLink, DiaChi FROM @Site
-    WHERE  MaKho <> 'KHO_' + UPPER(RIGHT(DB_NAME(),1));   -- bỏ qua chính mình
+    WHERE  MaKho <> 'KHO_' + UPPER(RIGHT(@@SERVERNAME,1));  -- bỏ qua chính mình
 OPEN cur;
 FETCH NEXT FROM cur INTO @Ma, @Link, @Dia;
 

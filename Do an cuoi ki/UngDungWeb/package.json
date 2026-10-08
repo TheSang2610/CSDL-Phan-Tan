@@ -1,10 +1,13 @@
 {
   "name": "ungdungweb",
   "version": "1.0.0",
-  "description": "",
+  "description": "Phan mem ung dung cho cac tram - do an CSDL phan tan",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "set SITE=KHO_A&& node server.js",
+    "dev:a": "set SITE=KHO_A&& node server.js",
+    "dev:b": "set SITE=KHO_B&& node server.js",
+    "dev:c": "set SITE=KHO_C&& node server.js"
   },
   "keywords": [],
   "author": "",
