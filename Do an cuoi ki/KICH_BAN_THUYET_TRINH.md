@@ -33,7 +33,7 @@ Mở sẵn **ba cửa sổ SSMS** nối vào ba máy, để sẵn ở ba tab. Đ
 Ba thể hiện `KHO_A`, `KHO_B`, `KHO_C` vẫn còn nguyên trên máy bạn, nên tập được
 đủ mọi màn mà không cần ai bật máy.
 
-**Chuyển sang chế độ một máy:** mở `SQL_DoiCheDo_MotMay_BaMay.sql`, dòng
+**Chuyển sang chế độ một máy:** mở `SQL\13_DoiCheDo_MotMay_BaMay.sql`, dòng
 `@CheDo` để `'MOTMAY'`, bấm F5. Rồi chạy `07b_ResetDeChupLaiAnh.sql`.
 
 Xong là tập được **màn 2 đến màn 7** y như thật: điều chuyển, thiếu hàng, lỗi
