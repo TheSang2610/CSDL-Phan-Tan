@@ -104,19 +104,58 @@ restore nhầm file.
 
 ---
 
+# GIAI ĐOẠN 1B — Bật MS DTC trên cả ba máy *(3 phút)* ⚠️ ĐỪNG BỎ QUA
+
+Giao tác phân tán bắt buộc có MS DTC làm trọng tài hai pha. Windows **mặc định
+cấm** DTC giao dịch qua mạng, nên thiếu bước này thì GIAI ĐOẠN 4 — phần demo
+chính — sẽ chết với thông báo:
+
+```
+The transaction manager has disabled its support for remote/network transactions.
+```
+
+Hoặc khó hiểu hơn: `No transaction is active.`
+
+**Mỗi máy bấm đúp `CHAY_BAT_MSDTC.bat`**, bấm **Yes** ở hộp thoại xin quyền. Hai
+file `.bat` và `.ps1` phải nằm chung một thư mục.
+
+Cuối script phải thấy đúng bốn dòng:
+
+```
+AuthenticationLevel         : NoAuth
+InboundTransactionsEnabled  : True
+OutboundTransactionsEnabled : True
+RemoteClientAccessEnabled   : True
+```
+
+Còn thấy `AuthenticationLevel : Mutual` là **chưa ăn** — chạy lại.
+
+> **Vì sao `NoAuth`:** ba máy không cùng domain nên không có cơ sở hạ tầng xác
+> thực chung, không dùng được `Mutual`. Đây là lựa chọn của phòng thực hành; môi
+> trường thật phải đưa máy vào domain và giữ `Mutual`. Nếu thầy hỏi thì trả lời
+> đúng như vậy.
+>
+> Lưu ý: ghi thẳng registry **không có tác dụng** — MS DTC không đọc mức xác thực
+> từ đó. Phải dùng `Set-DtcNetworkSetting`, và script đã làm sẵn.
+
+Bước này **chỉ lộ ra khi chạy ba máy thật**. Ba thể hiện trên cùng một máy dùng
+chung một DTC nội bộ nên không bao giờ gặp lỗi này.
+
+---
+
 # GIAI ĐOẠN 2 — Nối ba máy thành một hệ thống *(10 phút)*
 
-Đây là bước duy nhất phải gõ tay. Chỉ sửa **4 dòng**.
+Bốn thông số của bước này đã điền sẵn từ buổi chạy thử, chỉ cần mở file và bấm F5.
 
 ## 2.1. Mở `SQL\11_ChuyenSang3May.sql`
 
-Ở **PHẦN 0**, sửa bốn dòng có dấu `<<< SỬA`:
+Bốn dòng ở **PHẦN 0** đã được điền sẵn giá trị thật, **không phải sửa gì nữa** trừ khi IP ảo đổi:
 
 ```sql
-DECLARE @IP_KhoB      = N'10.91.___.___';      -- IP ảo máy bạn thứ nhất
-DECLARE @IP_KhoC      = N'10.91.___.___';      -- IP ảo máy bạn thứ hai
-DECLARE @TenMay_KhoB  = N'________\KHO_B';     -- tên máy chủ bạn thứ nhất
-DECLARE @TenMay_KhoC  = N'________\KHO_C';     -- tên máy chủ bạn thứ hai
+DECLARE @IP_KhoB      = N'10.91.229.252';      -- đã điền sẵn (Admin-PC)
+DECLARE @IP_KhoC      = N'10.91.229.121';      -- đã điền sẵn (GiaBinh)
+DECLARE @TenMay_KhoB  = N'Admin-PC\KHO_B';     -- đã điền sẵn
+DECLARE @TenMay_KhoC  = N'GiaBinh\KHO_C';      -- đã điền sẵn
 ```
 
 Dòng `@IP_KhoA` đã điền sẵn `10.91.229.18`, không phải sửa.
@@ -154,15 +193,30 @@ Trên **máy KHO_A**, chạy **PHẦN 4** của `11_ChuyenSang3May.sql`.
 ## 3.1. Bảng quan trọng nhất của cả buổi
 
 ```sql
-SELECT N'KHO_A' AS Site, @@SERVERNAME AS TenMayChuThat,
-       CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(60)) AS TenMayTinh
+USE KhoA;
+SELECT 'KHO_A' AS Site,
+       CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(40)) COLLATE DATABASE_DEFAULT AS MayTinhThat,
+       CAST(@@SERVERNAME AS NVARCHAR(60)) COLLATE DATABASE_DEFAULT AS Instance
 UNION ALL
-SELECT N'KHO_B', s.Srv, s.May FROM OPENQUERY([Mignon\KHO_B],
-       'SELECT Srv = @@SERVERNAME, May = CAST(SERVERPROPERTY(''MachineName'') AS NVARCHAR(60))') s
+SELECT 'KHO_B', May COLLATE DATABASE_DEFAULT, Inst COLLATE DATABASE_DEFAULT
+  FROM OPENQUERY([Mignon\KHO_B],
+       'SELECT CAST(SERVERPROPERTY(''MachineName'') AS NVARCHAR(40)) May,
+               CAST(@@SERVERNAME AS NVARCHAR(60)) Inst')
 UNION ALL
-SELECT N'KHO_C', s.Srv, s.May FROM OPENQUERY([Mignon\KHO_C],
-       'SELECT Srv = @@SERVERNAME, May = CAST(SERVERPROPERTY(''MachineName'') AS NVARCHAR(60))') s;
+SELECT 'KHO_C', May COLLATE DATABASE_DEFAULT, Inst COLLATE DATABASE_DEFAULT
+  FROM OPENQUERY([Mignon\KHO_C],
+       'SELECT CAST(SERVERPROPERTY(''MachineName'') AS NVARCHAR(40)) May,
+               CAST(@@SERVERNAME AS NVARCHAR(60)) Inst');
 ```
+
+> **Vì sao phải có `COLLATE DATABASE_DEFAULT`:** mỗi máy cài SQL Server với bộ đối
+> chiếu mặc định riêng. Máy Kho Trung tâm dùng `Vietnamese_CI_AS`, hai máy kia dùng
+> `SQL_Latin1_General_CP1_CI_AS`. Thiếu `COLLATE` thì câu này báo lỗi 451 chứ không
+> ra kết quả. Đây là lỗi chỉ gặp khi chạy trên ba máy thật.
+>
+> Cũng đừng viết `@@SERVERNAME` thẳng trong truy vấn con qua Linked Server — hàm đó
+> được tính **tại máy gọi**, nên ba dòng sẽ ra cùng một tên. Phải bọc trong
+> `OPENQUERY` để chuỗi lệnh được gửi sang máy kia và chạy ở bên đó.
 
 Kết quả phải ra **ba tên máy tính KHÁC NHAU**. Đó là bằng chứng ba site đang chạy
 trên ba máy vật lý riêng biệt, không phải ba thể hiện trên cùng một máy.
