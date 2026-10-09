@@ -2,7 +2,7 @@
 
 > Đồ án Cơ sở dữ liệu phân tán · Đề tài 2 — Quản lý kho vật tư đa chi nhánh · Nhóm 2
 >
-> Cầm tờ này khi demo. Mỗi mục có **lệnh chạy** và **lời nói** đi kèm.
+> **Bản cho ngày demo thật — ba máy vật lý.** Cầm tờ này khi demo. Mỗi mục có **lệnh chạy** và **lời nói** đi kèm.
 > Chỗ in nghiêng là câu nói, cứ đọc gần đúng ý là được, không cần thuộc lòng.
 
 ---
@@ -28,31 +28,7 @@ Mở sẵn **ba cửa sổ SSMS** nối vào ba máy, để sẵn ở ba tab. Đ
 
 ---
 
-# TẬP DƯỢT MỘT MÌNH — khi bạn bè không có mặt
-
-Ba thể hiện `KHO_A`, `KHO_B`, `KHO_C` vẫn còn nguyên trên máy bạn, nên tập được
-đủ mọi màn mà không cần ai bật máy.
-
-**Chuyển sang chế độ một máy:** mở `SQL\13_DoiCheDo_MotMay_BaMay.sql`, dòng
-`@CheDo` để `'MOTMAY'`, bấm F5. Rồi chạy `07b_ResetDeChupLaiAnh.sql`.
-
-Xong là tập được **màn 2 đến màn 7** y như thật: điều chuyển, thiếu hàng, lỗi
-giữa chừng, tổng kết, phần mềm web. Số liệu giống hệt.
-
-**Hôm demo thật:** mở lại file 13, đổi `@CheDo` thành `'BAMAY'`, bấm F5. Hoặc chạy
-file 11 như hướng dẫn. Hai cách tương đương.
-
-Ba điều cần biết khi tập một mình:
-
-- **Màn 1 không tập được.** Nó phải ra ba tên máy khác nhau, mà chế độ một máy
-  thì cả ba đều là `Mignon`. Bỏ qua màn này lúc tập.
-- **MS DTC không cần bật.** Ba thể hiện dùng chung một DTC nội bộ. Nên dù tập
-  trơn tru, hôm demo vẫn **phải chạy `CHAY_BAT_MSDTC.bat` ở cả ba máy**.
-- **Đồng bộ danh mục sẽ không chạy.** Replication vẫn đang trỏ sang hai máy bạn
-  bè. Không ảnh hưởng các màn khác; đừng hoảng khi thấy agent báo lỗi.
-
-Tập ít nhất **hai lượt trọn vẹn** trước hôm lên lớp. Lượt đầu để nhớ thứ tự,
-lượt sau để nói cho trôi.
+> **Chưa tập lần nào?** Đừng lấy file này ra tập. Mở `KICH_BAN_TAP_1MAY.pdf` — bản dành riêng cho việc tự diễn thử trên một máy, chỉ chi tiết từng bước và ghi rõ con số phải thấy. Tập xong hai lượt rồi hãy quay lại file này.
 
 ---
 
